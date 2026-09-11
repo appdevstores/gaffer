@@ -60,7 +60,13 @@ function getStageAction(
   }
 }
 
-export default function Scoreboard({ dense }: { dense?: boolean }) {
+interface ScoreboardProps {
+  dense?: boolean;
+  /** When provided, renders a ⚙ settings button in the action rail. */
+  onOpenSettings?: () => void;
+}
+
+export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
   const {
     match,
     perHalfSeconds,
@@ -140,6 +146,15 @@ export default function Scoreboard({ dense }: { dense?: boolean }) {
         >
           <Text style={styles.iconBtnText}>🔄</Text>
         </Pressable>
+        {onOpenSettings && (
+          <Pressable
+            style={[styles.iconBtn, styles.btnSettings]}
+            onPress={onOpenSettings}
+            accessibilityLabel="Match settings"
+          >
+            <Text style={styles.iconBtnText}>⚙</Text>
+          </Pressable>
+        )}
       </View>
 
       {/* Scorer selection for HOME goals */}
@@ -329,6 +344,9 @@ const styles = StyleSheet.create({
   },
   btnFlip: {
     backgroundColor: "#7c3aed",
+  },
+  btnSettings: {
+    backgroundColor: "#334155",
   },
   modalBackdrop: {
     flex: 1,

@@ -26,7 +26,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function MatchShell() {
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { seasonId } = useLocalSearchParams<{ seasonId: string }>();
@@ -155,20 +155,18 @@ function MatchShell() {
     );
   }
 
-  // Phone: canvas on top at 70% viewport, bench/actions scrolling beneath.
+  // Phone: vertical stack — scoreboard, pitch, then an always-visible bench
+  // grid (no sideways scrolling; extra subs scroll vertically inside it).
   return (
     <View style={styles.root}>
       {header}
-      <View style={[styles.phoneCanvas, { height: Math.round(height * 0.7) }]}>
+      <View style={styles.phoneScoreboard}>
+        <Scoreboard dense onOpenSettings={() => setSettingsOpen(true)} />
+      </View>
+      <View style={styles.phoneCanvas}>
         <PitchField onCardPress={openCardDialog} />
       </View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.phoneStrip}
-      >
-        <Scoreboard dense />
-        <View style={styles.phoneFormation}>{settingsButton}</View>
+      <View style={styles.phoneBench}>
         <BenchRoster
           bench={sortedBench}
           selectionId={selectionId}
@@ -177,10 +175,9 @@ function MatchShell() {
           nowSeconds={match.elapsedSeconds}
           fairShareSeconds={fairShareSeconds}
           onCardPress={(p) => openCardDialog(p.playerId)}
-          horizontal
           compact
         />
-      </ScrollView>
+      </View>
       {settingsModal}
       <CardDialog player={cardTarget} onClose={() => setCardTargetId(null)} />
     </View>
@@ -303,22 +300,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     padding: 2,
   },
-  phoneCanvas: {
-    paddingHorizontal: 6,
-    paddingBottom: 8,
-  },
-  phoneStrip: {
-    gap: 10,
+  phoneScoreboard: {
     paddingHorizontal: 10,
-    paddingBottom: 16,
-    alignItems: "flex-start",
+    paddingBottom: 6,
   },
-  phoneFormation: {
-    minWidth: 122,
-    backgroundColor: "#0f172a",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#1e293b",
-    padding: 6,
+  phoneCanvas: {
+    flex: 1,
+    paddingHorizontal: 6,
+    paddingBottom: 6,
+  },
+  phoneBench: {
+    height: 244,
+    paddingHorizontal: 10,
+    paddingBottom: 10,
   },
 });
