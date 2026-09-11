@@ -6,14 +6,14 @@ Copy-paste ready. All text below assumes **no data collection** (Gaffer is 100% 
 
 ## App Information (App Store Connect → App Information)
 
-| Field | Value |
-|---|---|
-| **Name** | Gaffer |
-| **Subtitle** | Soccer Match-Day Manager |
-| **Primary Category** | Sports |
-| **Secondary Category** | (leave empty) |
-| **Age Rating** | 4+ |
-| **App Privacy** | "Data Not Collected" — answer **No** to every data type |
+| Field                  | Value                                                   |
+| ---------------------- | ------------------------------------------------------- |
+| **Name**               | Gaffer                                                  |
+| **Subtitle**           | Soccer Match-Day Manager                                |
+| **Primary Category**   | Sports                                                  |
+| **Secondary Category** | (leave empty)                                           |
+| **Age Rating**         | 4+                                                      |
+| **App Privacy**        | "Data Not Collected" — answer **No** to every data type |
 
 ## Promotional Text (max 170 chars)
 
@@ -49,11 +49,11 @@ Copy-paste ready. All text below assumes **no data collection** (Gaffer is 100% 
 
 ## Support / Marketing / Privacy URLs
 
-| Field | Requirement |
-|---|---|
-| **Support URL** | Required — e.g. `https://gaffer-app.example/support` (any reachable page) |
-| **Marketing URL** | Optional |
-| **Privacy Policy URL** | **Required** for TestFlight external testing and App Store submission. Host the policy below anywhere public (GitHub Pages, Notion, etc.). |
+| Field                  | Value                                                       |
+| ---------------------- | ----------------------------------------------------------- |
+| **Support URL**        | `https://appdevstores.github.io/gaffer/support.html`        |
+| **Marketing URL**      | `https://appdevstores.github.io/gaffer/` (optional)         |
+| **Privacy Policy URL** | `https://appdevstores.github.io/gaffer/privacy-policy.html` |
 
 ---
 
