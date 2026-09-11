@@ -40,8 +40,12 @@ export const HALF_MINUTES_DEFAULT = 20;
 /** Field-player slots per game format (used for the fair-share target). */
 export const FIELD_SLOTS: Record<GameFormat, number> = {
   "4v4": 4,
+  "5v5": 5,
+  "6v6": 6,
   "7v7": 7,
+  "8v8": 8,
   "9v9": 9,
+  "10v10": 10,
   "11v11": 11,
 };
 

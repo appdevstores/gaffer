@@ -93,6 +93,7 @@ interface TeamRow {
   season_id: string;
   name: string;
   default_half_minutes: number;
+  default_game_format: GameFormat;
   created_at: string;
 }
 
@@ -102,6 +103,7 @@ function mapTeam(r: TeamRow): Team {
     seasonId: r.season_id,
     name: r.name,
     defaultHalfMinutes: r.default_half_minutes,
+    defaultGameFormat: r.default_game_format,
     createdAt: r.created_at,
   };
 }
@@ -119,6 +121,7 @@ export async function createTeam(
   seasonId: string,
   name: string,
   defaultHalfMinutes = 20,
+  defaultGameFormat: GameFormat = "7v7",
 ): Promise<Team> {
   const db = await getDb();
   const team: Team = {
@@ -126,14 +129,16 @@ export async function createTeam(
     seasonId,
     name: name.trim(),
     defaultHalfMinutes,
+    defaultGameFormat,
     createdAt: new Date().toISOString(),
   };
   await db.runAsync(
-    "INSERT INTO teams (id, season_id, name, default_half_minutes, created_at) VALUES (?, ?, ?, ?, ?)",
+    "INSERT INTO teams (id, season_id, name, default_half_minutes, default_game_format, created_at) VALUES (?, ?, ?, ?, ?, ?)",
     team.id,
     team.seasonId,
     team.name,
     team.defaultHalfMinutes,
+    team.defaultGameFormat,
     team.createdAt,
   );
   return team;
@@ -150,7 +155,9 @@ export async function getTeam(id: string): Promise<Team | null> {
 
 export async function updateTeam(
   id: string,
-  patch: Partial<Pick<Team, "name" | "defaultHalfMinutes">>,
+  patch: Partial<
+    Pick<Team, "name" | "defaultHalfMinutes" | "defaultGameFormat">
+  >,
 ): Promise<void> {
   const db = await getDb();
   if (patch.name !== undefined) {
@@ -164,6 +171,13 @@ export async function updateTeam(
     await db.runAsync(
       "UPDATE teams SET default_half_minutes = ? WHERE id = ?",
       patch.defaultHalfMinutes,
+      id,
+    );
+  }
+  if (patch.defaultGameFormat !== undefined) {
+    await db.runAsync(
+      "UPDATE teams SET default_game_format = ? WHERE id = ?",
+      patch.defaultGameFormat,
       id,
     );
   }

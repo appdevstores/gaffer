@@ -5,7 +5,15 @@
 
 export type PlayerStatus = "field" | "bench";
 
-export type GameFormat = "4v4" | "7v7" | "9v9" | "11v11";
+export type GameFormat =
+  | "4v4"
+  | "5v5"
+  | "6v6"
+  | "7v7"
+  | "8v8"
+  | "9v9"
+  | "10v10"
+  | "11v11";
 
 export type MatchStage =
   | "PRE_MATCH"
@@ -39,6 +47,7 @@ export interface Team {
   seasonId: string;
   name: string;
   defaultHalfMinutes: number;
+  defaultGameFormat: GameFormat;
   createdAt: string;
 }
 

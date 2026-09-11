@@ -8,7 +8,7 @@
 // x=0 is the goal line the team defends (NORMAL orientation), x=100 is the goal
 // they attack. y=0 is the top touchline, y=100 the bottom.
 
-import type { GameFormat } from '@/core/types';
+import type { GameFormat } from "@/core/types";
 
 export interface FormationSlot {
   xPct: number;
@@ -23,12 +23,14 @@ export interface Formation {
   slots: FormationSlot[];
 }
 
-export const FORMATIONS: Record<GameFormat, Formation[]> = {
-  '4v4': [
+type SupportedFormationFormat = "4v4" | "7v7" | "9v9" | "11v11";
+
+export const FORMATIONS: Record<SupportedFormationFormat, Formation[]> = {
+  "4v4": [
     {
-      id: 'diamond',
-      label: 'Diamond',
-      shape: '1-2-1',
+      id: "diamond",
+      label: "Diamond",
+      shape: "1-2-1",
       slots: [
         { xPct: 16, yPct: 50 }, // back
         { xPct: 46, yPct: 28 }, // mid left
@@ -37,9 +39,9 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
     {
-      id: 'box',
-      label: 'Box Square',
-      shape: '2-2',
+      id: "box",
+      label: "Box Square",
+      shape: "2-2",
       slots: [
         { xPct: 22, yPct: 34 },
         { xPct: 22, yPct: 66 },
@@ -48,9 +50,9 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
     {
-      id: 'defensive-2-1-1',
-      label: 'Defensive',
-      shape: '2-1-1',
+      id: "defensive-2-1-1",
+      label: "Defensive",
+      shape: "2-1-1",
       slots: [
         { xPct: 16, yPct: 38 },
         { xPct: 16, yPct: 62 },
@@ -59,11 +61,11 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
   ],
-  '7v7': [
+  "7v7": [
     {
-      id: '1-2-3-1',
-      label: 'Diamond',
-      shape: '1-2-3-1',
+      id: "1-2-3-1",
+      label: "Diamond",
+      shape: "1-2-3-1",
       slots: [
         { xPct: 10, yPct: 50 },
         { xPct: 32, yPct: 34 },
@@ -75,9 +77,9 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
     {
-      id: '2-3-1',
-      label: '2-3-1',
-      shape: '2-3-1',
+      id: "2-3-1",
+      label: "2-3-1",
+      shape: "2-3-1",
       slots: [
         { xPct: 10, yPct: 50 },
         { xPct: 30, yPct: 30 },
@@ -89,9 +91,9 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
     {
-      id: '3-2-1',
-      label: '3-2-1',
-      shape: '3-2-1',
+      id: "3-2-1",
+      label: "3-2-1",
+      shape: "3-2-1",
       slots: [
         { xPct: 10, yPct: 50 },
         { xPct: 28, yPct: 24 },
@@ -103,9 +105,9 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
     {
-      id: '2-2-2',
-      label: '2-2-2',
-      shape: '2-2-2',
+      id: "2-2-2",
+      label: "2-2-2",
+      shape: "2-2-2",
       slots: [
         { xPct: 10, yPct: 50 },
         { xPct: 30, yPct: 34 },
@@ -117,11 +119,11 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
   ],
-  '9v9': [
+  "9v9": [
     {
-      id: '3-3-2',
-      label: '3-3-2',
-      shape: '3-3-2',
+      id: "3-3-2",
+      label: "3-3-2",
+      shape: "3-3-2",
       slots: [
         { xPct: 8, yPct: 50 },
         { xPct: 25, yPct: 25 },
@@ -135,9 +137,9 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
     {
-      id: '3-2-3',
-      label: '3-2-3',
-      shape: '3-2-3',
+      id: "3-2-3",
+      label: "3-2-3",
+      shape: "3-2-3",
       slots: [
         { xPct: 8, yPct: 50 },
         { xPct: 25, yPct: 30 },
@@ -151,9 +153,9 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
     {
-      id: '4-3-1',
-      label: '4-3-1',
-      shape: '4-3-1',
+      id: "4-3-1",
+      label: "4-3-1",
+      shape: "4-3-1",
       slots: [
         { xPct: 8, yPct: 50 },
         { xPct: 22, yPct: 18 },
@@ -167,9 +169,9 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
     {
-      id: '2-4-2',
-      label: '2-4-2',
-      shape: '2-4-2',
+      id: "2-4-2",
+      label: "2-4-2",
+      shape: "2-4-2",
       slots: [
         { xPct: 8, yPct: 50 },
         { xPct: 28, yPct: 35 },
@@ -183,11 +185,11 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
   ],
-  '11v11': [
+  "11v11": [
     {
-      id: '4-4-2',
-      label: '4-4-2',
-      shape: '4-4-2',
+      id: "4-4-2",
+      label: "4-4-2",
+      shape: "4-4-2",
       slots: [
         { xPct: 6, yPct: 50 },
         { xPct: 20, yPct: 14 },
@@ -203,9 +205,9 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
     {
-      id: '4-3-3',
-      label: '4-3-3',
-      shape: '4-3-3',
+      id: "4-3-3",
+      label: "4-3-3",
+      shape: "4-3-3",
       slots: [
         { xPct: 6, yPct: 50 },
         { xPct: 20, yPct: 14 },
@@ -221,9 +223,9 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
     {
-      id: '5-3-2',
-      label: '5-3-2',
-      shape: '5-3-2',
+      id: "5-3-2",
+      label: "5-3-2",
+      shape: "5-3-2",
       slots: [
         { xPct: 6, yPct: 50 },
         { xPct: 16, yPct: 12 },
@@ -239,9 +241,9 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
       ],
     },
     {
-      id: '3-5-2',
-      label: '3-5-2',
-      shape: '3-5-2',
+      id: "3-5-2",
+      label: "3-5-2",
+      shape: "3-5-2",
       slots: [
         { xPct: 6, yPct: 50 },
         { xPct: 20, yPct: 25 },
@@ -259,15 +261,33 @@ export const FORMATIONS: Record<GameFormat, Formation[]> = {
   ],
 };
 
-export const GAME_FORMATS: GameFormat[] = ['4v4', '7v7', '9v9', '11v11'];
+export const GAME_FORMATS: GameFormat[] = [
+  "4v4",
+  "5v5",
+  "6v6",
+  "7v7",
+  "8v8",
+  "9v9",
+  "10v10",
+  "11v11",
+];
+
+/** Formats without a bespoke matrix use the nearest supported line preset. */
+function formationFormat(format: GameFormat): "4v4" | "7v7" | "9v9" | "11v11" {
+  if (format === "5v5" || format === "6v6") return "7v7";
+  if (format === "8v8") return "9v9";
+  if (format === "10v10") return "11v11";
+  return format;
+}
 
 export function getFormation(format: GameFormat, id: string): Formation {
-  const found = FORMATIONS[format].find((f) => f.id === id);
-  return found ?? FORMATIONS[format][0];
+  const options = FORMATIONS[formationFormat(format)];
+  const found = options.find((f) => f.id === id);
+  return found ?? options[0];
 }
 
 export function getFormationsForFormat(format: GameFormat): Formation[] {
-  return FORMATIONS[format];
+  return FORMATIONS[formationFormat(format)];
 }
 
 /**
@@ -275,7 +295,7 @@ export function getFormationsForFormat(format: GameFormat): Formation[] {
  * coordinate 180° using basic matrix mirroring (100 - x, 100 - y).
  */
 export function invertPitchCoordinates(
-  points: { xPct: number | null; yPct: number | null }[]
+  points: { xPct: number | null; yPct: number | null }[],
 ): { xPct: number | null; yPct: number | null }[] {
   return points.map((p) => {
     if (p.xPct === null || p.yPct === null) return p;

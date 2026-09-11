@@ -17,7 +17,7 @@ import {
 } from "@/core/repo";
 import type { GameFormat, Player, Team, TeamSide } from "@/core/types";
 import { avatarColor, avatarInitials } from "@/lib/avatars";
-import { GAME_FORMATS, getFormation } from "@/lib/formations";
+import { getFormation } from "@/lib/formations";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -62,6 +62,8 @@ export default function SetupMatch() {
     if (!teamId) {
       setTeamId(selectedTeam.id);
       setTeamName(selectedTeam.name);
+      setFormat(selectedTeam.defaultGameFormat);
+      setFormationId(getFormation(selectedTeam.defaultGameFormat, "").id);
       setHalfMinutes(String(selectedTeam.defaultHalfMinutes));
     }
     setPlayers(await listPlayers(seasonId, selectedTeam.id));
@@ -167,6 +169,8 @@ export default function SetupMatch() {
                 onPress={() => {
                   setTeamId(team.id);
                   setTeamName(team.name);
+                  setFormat(team.defaultGameFormat);
+                  setFormationId(getFormation(team.defaultGameFormat, "").id);
                   setHalfMinutes(String(team.defaultHalfMinutes));
                   refreshPlayers();
                 }}
@@ -222,27 +226,9 @@ export default function SetupMatch() {
 
       <Text style={styles.stepTitle}>Match Settings</Text>
       <View style={styles.card}>
-        <Text style={styles.label}>Game Format</Text>
-        <View style={styles.formatRow}>
-          {GAME_FORMATS.map((f) => (
-            <Pressable
-              key={f}
-              onPress={() => changeFormat(f)}
-              style={[
-                styles.formatChip,
-                format === f && styles.formatChipActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.formatChipText,
-                  format === f && styles.formatChipTextActive,
-                ]}
-              >
-                {f}
-              </Text>
-            </Pressable>
-          ))}
+        <View style={styles.inheritedRow}>
+          <Text style={styles.label}>Team format</Text>
+          <Text style={styles.inheritedValue}>{format}</Text>
         </View>
 
         <View style={styles.formationWrap}>
@@ -253,13 +239,10 @@ export default function SetupMatch() {
           />
         </View>
 
-        <Text style={styles.label}>Half Length (minutes)</Text>
-        <TextInput
-          style={[styles.input, styles.halfInput]}
-          value={halfMinutes}
-          onChangeText={setHalfMinutes}
-          keyboardType="number-pad"
-        />
+        <View style={styles.inheritedRow}>
+          <Text style={styles.label}>Team half length</Text>
+          <Text style={styles.inheritedValue}>{halfMinutes} min</Text>
+        </View>
 
         <View style={styles.etRow}>
           <View style={styles.etInfo}>
@@ -598,6 +581,20 @@ const styles = StyleSheet.create({
   },
   formatChipTextActive: {
     color: "#fff",
+  },
+  inheritedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#1e293b",
+    borderRadius: 9,
+    paddingHorizontal: 10,
+    marginTop: 8,
+  },
+  inheritedValue: {
+    color: "#86efac",
+    fontSize: 14,
+    fontWeight: "900",
   },
   formationWrap: {
     marginTop: 10,

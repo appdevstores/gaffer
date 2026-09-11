@@ -42,6 +42,7 @@ async function migrate(db: SQLite.SQLiteDatabase): Promise<void> {
       season_id TEXT NOT NULL,
       name TEXT NOT NULL,
       default_half_minutes INTEGER NOT NULL DEFAULT 20,
+      default_game_format TEXT NOT NULL DEFAULT '7v7',
       created_at TEXT NOT NULL,
       FOREIGN KEY (season_id) REFERENCES seasons(id) ON DELETE CASCADE
     );
@@ -180,6 +181,14 @@ async function migrateV2ExtraTime(db: SQLite.SQLiteDatabase): Promise<void> {
   );
   if (!matchColumns.some((c) => c.name === "team_id")) {
     await db.execAsync("ALTER TABLE matches ADD COLUMN team_id TEXT");
+  }
+  const teamColumns = await db.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(teams)",
+  );
+  if (!teamColumns.some((c) => c.name === "default_game_format")) {
+    await db.execAsync(
+      "ALTER TABLE teams ADD COLUMN default_game_format TEXT NOT NULL DEFAULT '7v7'",
+    );
   }
   const seasons = await db.getAllAsync<{ id: string; name: string }>(
     "SELECT id, name FROM seasons",
