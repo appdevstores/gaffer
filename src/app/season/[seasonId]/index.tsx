@@ -140,6 +140,12 @@ export default function SeasonDashboard() {
         <View style={styles.actionRow}>
           <Pressable
             style={[styles.actionBtn, styles.actionPrimary]}
+            onPress={() => router.push(`/season/${seasonId}/teams`)}
+          >
+            <Text style={styles.actionText}>👥 Teams</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.actionBtn, styles.actionSecondary]}
             onPress={() => router.push(`/season/${seasonId}/setup-match`)}
           >
             <Text style={styles.actionText}>+ New Match</Text>

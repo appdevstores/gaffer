@@ -24,6 +24,10 @@ export default function RootLayout() {
           options={{ title: "Match Setup" }}
         />
         <Stack.Screen
+          name="season/[seasonId]/teams"
+          options={{ title: "Teams" }}
+        />
+        <Stack.Screen
           name="season/[seasonId]/match/[matchId]"
           options={{ headerShown: false }}
         />

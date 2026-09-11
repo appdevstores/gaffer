@@ -12,6 +12,7 @@ import type {
   MatchStage,
   Player,
   Season,
+  Team,
 } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -87,12 +88,98 @@ export async function stopSeason(id: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Teams
+// ---------------------------------------------------------------------------
+
+interface TeamRow {
+  id: string;
+  season_id: string;
+  name: string;
+  default_half_minutes: number;
+  created_at: string;
+}
+
+function mapTeam(r: TeamRow): Team {
+  return {
+    id: r.id,
+    seasonId: r.season_id,
+    name: r.name,
+    defaultHalfMinutes: r.default_half_minutes,
+    createdAt: r.created_at,
+  };
+}
+
+export async function listTeams(seasonId: string): Promise<Team[]> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<TeamRow>(
+    "SELECT * FROM teams WHERE season_id = ? ORDER BY created_at ASC",
+    seasonId,
+  );
+  return rows.map(mapTeam);
+}
+
+export async function createTeam(
+  seasonId: string,
+  name: string,
+  defaultHalfMinutes = 20,
+): Promise<Team> {
+  const db = await getDb();
+  const team: Team = {
+    id: uuid(),
+    seasonId,
+    name: name.trim(),
+    defaultHalfMinutes,
+    createdAt: new Date().toISOString(),
+  };
+  await db.runAsync(
+    "INSERT INTO teams (id, season_id, name, default_half_minutes, created_at) VALUES (?, ?, ?, ?, ?)",
+    team.id,
+    team.seasonId,
+    team.name,
+    team.defaultHalfMinutes,
+    team.createdAt,
+  );
+  return team;
+}
+
+export async function getTeam(id: string): Promise<Team | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<TeamRow>(
+    "SELECT * FROM teams WHERE id = ?",
+    id,
+  );
+  return row ? mapTeam(row) : null;
+}
+
+export async function updateTeam(
+  id: string,
+  patch: Partial<Pick<Team, "name" | "defaultHalfMinutes">>,
+): Promise<void> {
+  const db = await getDb();
+  if (patch.name !== undefined) {
+    await db.runAsync(
+      "UPDATE teams SET name = ? WHERE id = ?",
+      patch.name.trim(),
+      id,
+    );
+  }
+  if (patch.defaultHalfMinutes !== undefined) {
+    await db.runAsync(
+      "UPDATE teams SET default_half_minutes = ? WHERE id = ?",
+      patch.defaultHalfMinutes,
+      id,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Players
 // ---------------------------------------------------------------------------
 
 interface PlayerRow {
   id: string;
   season_id: string;
+  team_id: string;
   name: string;
   jersey_number: number;
   avatar_seed: string;
@@ -105,6 +192,7 @@ function mapPlayer(r: PlayerRow): Player {
   return {
     id: r.id,
     seasonId: r.season_id,
+    teamId: r.team_id,
     name: r.name,
     jerseyNumber: r.jersey_number,
     avatarSeed: r.avatar_seed,
@@ -114,12 +202,21 @@ function mapPlayer(r: PlayerRow): Player {
   };
 }
 
-export async function listPlayers(seasonId: string): Promise<Player[]> {
+export async function listPlayers(
+  seasonId: string,
+  teamId?: string,
+): Promise<Player[]> {
   const db = await getDb();
-  const rows = await db.getAllAsync<PlayerRow>(
-    "SELECT * FROM players WHERE season_id = ? ORDER BY created_at ASC",
-    seasonId,
-  );
+  const rows = teamId
+    ? await db.getAllAsync<PlayerRow>(
+        "SELECT * FROM players WHERE season_id = ? AND team_id = ? ORDER BY created_at ASC",
+        seasonId,
+        teamId,
+      )
+    : await db.getAllAsync<PlayerRow>(
+        "SELECT * FROM players WHERE season_id = ? ORDER BY created_at ASC",
+        seasonId,
+      );
   return rows.map(mapPlayer);
 }
 
@@ -137,11 +234,23 @@ export async function addPlayer(
   seasonId: string,
   name: string,
   jerseyNumber: number,
+  teamId?: string,
 ): Promise<Player> {
   const db = await getDb();
+  const resolvedTeam =
+    teamId ??
+    (
+      await db.getFirstAsync<{ id: string }>(
+        "SELECT id FROM teams WHERE season_id = ? ORDER BY created_at ASC LIMIT 1",
+        seasonId,
+      )
+    )?.id;
+  if (!resolvedTeam)
+    throw new Error("A team is required before adding players");
   const player: Player = {
     id: uuid(),
     seasonId,
+    teamId: resolvedTeam,
     name: name.trim(),
     jerseyNumber,
     avatarSeed: generateAvatarSeed(name),
@@ -150,9 +259,10 @@ export async function addPlayer(
     createdAt: new Date().toISOString(),
   };
   await db.runAsync(
-    "INSERT INTO players (id, season_id, name, jersey_number, avatar_seed, total_seconds, match_goals, created_at) VALUES (?, ?, ?, ?, ?, 0, 0, ?)",
+    "INSERT INTO players (id, season_id, team_id, name, jersey_number, avatar_seed, total_seconds, match_goals, created_at) VALUES (?, ?, ?, ?, ?, ?, 0, 0, ?)",
     player.id,
     player.seasonId,
+    player.teamId,
     player.name,
     player.jerseyNumber,
     player.avatarSeed,
@@ -195,6 +305,7 @@ export async function flushPlayerCumulatives(
 interface MatchRow {
   id: string;
   season_id: string;
+  team_id: string;
   team_name: string;
   opponent_name: string;
   game_format: GameFormat;
@@ -219,6 +330,7 @@ function mapMatch(r: MatchRow): MatchSession {
   return {
     id: r.id,
     seasonId: r.season_id,
+    teamId: r.team_id,
     teamName: r.team_name,
     opponentName: r.opponent_name,
     gameFormat: r.game_format,
@@ -242,6 +354,7 @@ function mapMatch(r: MatchRow): MatchSession {
 
 export interface NewMatchInput {
   seasonId: string;
+  teamId: string;
   teamName: string;
   opponentName: string;
   teamSide?: "HOME" | "AWAY";
@@ -258,6 +371,7 @@ export async function createMatch(input: NewMatchInput): Promise<MatchSession> {
   const match: MatchSession = {
     id: uuid(),
     seasonId: input.seasonId,
+    teamId: input.teamId,
     teamName: input.teamName.trim(),
     opponentName: input.opponentName.trim(),
     gameFormat: input.gameFormat,
@@ -279,7 +393,7 @@ export async function createMatch(input: NewMatchInput): Promise<MatchSession> {
   };
   await db.runAsync(
     `INSERT INTO matches (
-      id, season_id, team_name, opponent_name, game_format, tactical_shape,
+      id, season_id, team_id, team_name, opponent_name, game_format, tactical_shape,
       current_stage, field_orientation, team_side, target_half_minutes,
       extra_time_enabled, extra_time_half_minutes, extra_time_halves,
       home_score, away_score, elapsed_seconds, is_clock_active, stage_start_seconds,
@@ -287,6 +401,7 @@ export async function createMatch(input: NewMatchInput): Promise<MatchSession> {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, ?, NULL)`,
     match.id,
     match.seasonId,
+    match.teamId,
     match.teamName,
     match.opponentName,
     match.gameFormat,

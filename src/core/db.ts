@@ -6,6 +6,7 @@
 // idempotent migration steps.
 
 import * as SQLite from "expo-sqlite";
+import { uuid } from "./id";
 
 export const DB_NAME = "gaffer.db";
 
@@ -36,21 +37,33 @@ async function migrate(db: SQLite.SQLiteDatabase): Promise<void> {
       end_date TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS teams (
+      id TEXT PRIMARY KEY NOT NULL,
+      season_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      default_half_minutes INTEGER NOT NULL DEFAULT 20,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (season_id) REFERENCES seasons(id) ON DELETE CASCADE
+    );
+
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY NOT NULL,
       season_id TEXT NOT NULL,
+      team_id TEXT,
       name TEXT NOT NULL,
       jersey_number INTEGER NOT NULL DEFAULT 0,
       avatar_seed TEXT NOT NULL,
       total_seconds INTEGER NOT NULL DEFAULT 0,
       match_goals INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL,
-      FOREIGN KEY (season_id) REFERENCES seasons(id) ON DELETE CASCADE
+      FOREIGN KEY (season_id) REFERENCES seasons(id) ON DELETE CASCADE,
+      FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE SET NULL
     );
 
     CREATE TABLE IF NOT EXISTS matches (
       id TEXT PRIMARY KEY NOT NULL,
       season_id TEXT NOT NULL,
+      team_id TEXT,
       team_name TEXT NOT NULL,
       opponent_name TEXT NOT NULL,
       game_format TEXT NOT NULL,
@@ -66,7 +79,8 @@ async function migrate(db: SQLite.SQLiteDatabase): Promise<void> {
       stage_start_seconds INTEGER NOT NULL DEFAULT 0,
       started_at TEXT NOT NULL,
       completed_at TEXT,
-      FOREIGN KEY (season_id) REFERENCES seasons(id) ON DELETE CASCADE
+      FOREIGN KEY (season_id) REFERENCES seasons(id) ON DELETE CASCADE,
+      FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE SET NULL
     );
 
     CREATE TABLE IF NOT EXISTS match_players (
@@ -150,6 +164,51 @@ async function migrateV2ExtraTime(db: SQLite.SQLiteDatabase): Promise<void> {
   if (!mp.some((c) => c.name === "sent_off")) {
     await db.execAsync(
       "ALTER TABLE match_players ADD COLUMN sent_off INTEGER NOT NULL DEFAULT 0",
+    );
+  }
+
+  // v6: introduce teams and migrate existing season-wide players into one
+  // default team. Existing matches remain valid and can be assigned later.
+  const playerColumns = await db.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(players)",
+  );
+  if (!playerColumns.some((c) => c.name === "team_id")) {
+    await db.execAsync("ALTER TABLE players ADD COLUMN team_id TEXT");
+  }
+  const matchColumns = await db.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(matches)",
+  );
+  if (!matchColumns.some((c) => c.name === "team_id")) {
+    await db.execAsync("ALTER TABLE matches ADD COLUMN team_id TEXT");
+  }
+  const seasons = await db.getAllAsync<{ id: string; name: string }>(
+    "SELECT id, name FROM seasons",
+  );
+  for (const season of seasons) {
+    let team = await db.getFirstAsync<{ id: string }>(
+      "SELECT id FROM teams WHERE season_id = ? ORDER BY created_at ASC LIMIT 1",
+      season.id,
+    );
+    if (!team) {
+      const id = uuid();
+      await db.runAsync(
+        "INSERT INTO teams (id, season_id, name, default_half_minutes, created_at) VALUES (?, ?, ?, 20, ?)",
+        id,
+        season.id,
+        season.name,
+        new Date().toISOString(),
+      );
+      team = { id };
+    }
+    await db.runAsync(
+      "UPDATE players SET team_id = ? WHERE season_id = ? AND team_id IS NULL",
+      team.id,
+      season.id,
+    );
+    await db.runAsync(
+      "UPDATE matches SET team_id = ? WHERE season_id = ? AND team_id IS NULL",
+      team.id,
+      season.id,
     );
   }
 }

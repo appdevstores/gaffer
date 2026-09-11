@@ -12,9 +12,10 @@ import {
   createMatch,
   deletePlayer,
   listPlayers,
+  listTeams,
   seedMatchPlayers,
 } from "@/core/repo";
-import type { GameFormat, Player, TeamSide } from "@/core/types";
+import type { GameFormat, Player, Team, TeamSide } from "@/core/types";
 import { avatarColor, avatarInitials } from "@/lib/avatars";
 import { GAME_FORMATS, getFormation } from "@/lib/formations";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -32,6 +33,8 @@ export default function SetupMatch() {
   const { seasonId } = useLocalSearchParams<{ seasonId: string }>();
   const router = useRouter();
 
+  const [teamId, setTeamId] = useState("");
+  const [teams, setTeams] = useState<Team[]>([]);
   const [teamName, setTeamName] = useState("");
   const [rememberedTeamName, setRememberedTeamName] = useState("");
   const [opponentName, setOpponentName] = useState("");
@@ -51,8 +54,18 @@ export default function SetupMatch() {
 
   const refreshPlayers = useCallback(async () => {
     if (!seasonId) return;
-    setPlayers(await listPlayers(seasonId));
-  }, [seasonId]);
+    const availableTeams = await listTeams(seasonId);
+    setTeams(availableTeams);
+    const selectedTeam =
+      availableTeams.find((t) => t.id === teamId) ?? availableTeams[0];
+    if (!selectedTeam) return;
+    if (!teamId) {
+      setTeamId(selectedTeam.id);
+      setTeamName(selectedTeam.name);
+      setHalfMinutes(String(selectedTeam.defaultHalfMinutes));
+    }
+    setPlayers(await listPlayers(seasonId, selectedTeam.id));
+  }, [seasonId, teamId]);
 
   useEffect(() => {
     refreshPlayers();
@@ -60,7 +73,6 @@ export default function SetupMatch() {
     getMetaValue("remembered_team_name").then((remembered) => {
       if (remembered) {
         setRememberedTeamName(remembered);
-        setTeamName(remembered); // auto-selected — Start always works
       }
     });
   }, [refreshPlayers]);
@@ -73,7 +85,8 @@ export default function SetupMatch() {
   const submitPlayer = async () => {
     const name = entryName.trim();
     if (!name || !seasonId) return;
-    await addPlayer(seasonId, name, parseInt(entryJersey, 10) || 0);
+    if (!teamId) return;
+    await addPlayer(seasonId, name, parseInt(entryJersey, 10) || 0, teamId);
     setEntryName("");
     setEntryJersey("");
     // §3 Step 3: clear input + FocusNode.requestFocus() back onto the name box.
@@ -91,6 +104,10 @@ export default function SetupMatch() {
   const handleStart = async () => {
     if (!seasonId) return;
     setStartError(null);
+    if (!teamId) {
+      setStartError("Create a team in Team Manager first.");
+      return;
+    }
     if (!teamName.trim()) {
       setStartError("Tap your team name above to select it.");
       return;
@@ -104,6 +121,7 @@ export default function SetupMatch() {
     try {
       const match = await createMatch({
         seasonId,
+        teamId,
         teamName,
         opponentName: opponentName.trim() || "Opponent",
         teamSide,
@@ -133,23 +151,41 @@ export default function SetupMatch() {
       <Text style={styles.stepTitle}>Step 2 · Teams</Text>
       <View style={styles.card}>
         <Text style={styles.label}>Our Team</Text>
-        {rememberedTeamName ? (
-          <Pressable
-            style={[
-              styles.teamSuggestion,
-              teamName === rememberedTeamName && styles.teamSuggestionActive,
-            ]}
-            onPress={() => setTeamName(rememberedTeamName)}
+        {teams.length > 0 ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.teamChoices}
           >
-            <Text style={styles.teamSuggestionIcon}>✓</Text>
-            <Text style={styles.teamSuggestionText}>{rememberedTeamName}</Text>
-            <Text style={styles.teamSuggestionHint}>
-              {teamName === rememberedTeamName ? "Selected" : "Tap to use"}
-            </Text>
-          </Pressable>
+            {teams.map((team) => (
+              <Pressable
+                key={team.id}
+                style={[
+                  styles.teamSuggestion,
+                  teamId === team.id && styles.teamSuggestionActive,
+                ]}
+                onPress={() => {
+                  setTeamId(team.id);
+                  setTeamName(team.name);
+                  setHalfMinutes(String(team.defaultHalfMinutes));
+                  refreshPlayers();
+                }}
+              >
+                <Text style={styles.teamSuggestionIcon}>
+                  {teamId === team.id ? "✓" : "○"}
+                </Text>
+                <View>
+                  <Text style={styles.teamSuggestionText}>{team.name}</Text>
+                  <Text style={styles.teamSuggestionHint}>
+                    {team.defaultHalfMinutes} min halves
+                  </Text>
+                </View>
+              </Pressable>
+            ))}
+          </ScrollView>
         ) : (
           <Text style={styles.emptyTeam}>
-            Choose your team when starting a season.
+            Add a team in Team Manager first.
           </Text>
         )}
         <Text style={styles.label}>Opponent Name</Text>
@@ -383,6 +419,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
     marginTop: 8,
     marginBottom: 5,
+  },
+  teamChoices: {
+    gap: 8,
+    paddingBottom: 2,
   },
   teamSuggestion: {
     minHeight: 46,

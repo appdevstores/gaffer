@@ -4,7 +4,7 @@
 
 import { getMetaValue, setMetaValue } from "@/core/db";
 import { isPremiumUnlocked } from "@/core/premium";
-import { createSeason, listSeasons, stopSeason } from "@/core/repo";
+import { createSeason, createTeam, listSeasons, stopSeason } from "@/core/repo";
 import type { Season as SeasonType } from "@/core/types";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -54,12 +54,13 @@ export default function SeasonGate() {
     const team = newTeamName.trim();
     if (!name || !team) return;
     const season = await createSeason(name);
+    await createTeam(season.id, team, 20);
     await setMetaValue("active_season_id", season.id);
     await setMetaValue("remembered_team_name", team);
     setShowNew(false);
     setNewName("");
     setNewTeamName("");
-    router.push(`/season/${season.id}/setup-match`);
+    router.push(`/season/${season.id}/teams`);
   };
 
   const handleStopSeason = (s: SeasonType) => {

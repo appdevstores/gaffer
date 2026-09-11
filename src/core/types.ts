@@ -34,9 +34,18 @@ export interface Season {
   endDate: string | null;
 }
 
+export interface Team {
+  id: string;
+  seasonId: string;
+  name: string;
+  defaultHalfMinutes: number;
+  createdAt: string;
+}
+
 export interface Player {
   id: string;
   seasonId: string; // Enforces data isolation between separate seasons
+  teamId: string; // Each player belongs to exactly one team in a season
   name: string;
   jerseyNumber: number;
   avatarSeed: string; // Seed passed to the avatar renderer (Dicebear-style)
@@ -48,6 +57,7 @@ export interface Player {
 export interface MatchSession {
   id: string;
   seasonId: string;
+  teamId: string;
   teamName: string;
   opponentName: string;
   gameFormat: GameFormat;
