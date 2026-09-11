@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "gaffer",
+    "name": "Gaffer",
     "slug": "gaffer",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,9 +8,16 @@
     "scheme": "gaffer",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "com.gaffersoccer.app",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.gaffersoccer.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -32,11 +39,18 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0611a934-7a69-4488-8921-332906703079"
+      }
     }
   }
 }

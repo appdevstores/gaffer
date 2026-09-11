@@ -1,98 +1,420 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// §3 Step 1 — The Season Lifecycle Gate Launcher.
+// On launch the app evaluates local storage and presents: Start a New Season,
+// Open an Existing Season, or Season Lifecycle End (Stop Season).
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { getMetaValue, setMetaValue } from "@/core/db";
+import { isPremiumUnlocked } from "@/core/premium";
+import { createSeason, listSeasons, stopSeason } from "@/core/repo";
+import type { Season as SeasonType } from "@/core/types";
+import { useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+export default function SeasonGate() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const [seasons, setSeasons] = useState<SeasonType[]>([]);
+  const [activeSeasonId, setActiveSeasonId] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newTeamName, setNewTeamName] = useState("");
+  const [confirmStop, setConfirmStop] = useState<SeasonType | null>(null);
+
+  const refresh = useCallback(async () => {
+    const [list, active] = await Promise.all([
+      listSeasons(),
+      getMetaValue("active_season_id"),
+    ]);
+    setSeasons(list);
+    setActiveSeasonId(active);
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  const openSeason = async (s: SeasonType) => {
+    await setMetaValue("active_season_id", s.id);
+    router.push(`/season/${s.id}`);
+  };
+
+  const handleCreate = async () => {
+    const name = newName.trim();
+    const team = newTeamName.trim();
+    if (!name || !team) return;
+    const season = await createSeason(name);
+    await setMetaValue("active_season_id", season.id);
+    await setMetaValue("remembered_team_name", team);
+    setShowNew(false);
+    setNewName("");
+    setNewTeamName("");
+    router.push(`/season/${season.id}/setup-match`);
+  };
+
+  const handleStopSeason = (s: SeasonType) => {
+    setConfirmStop(s);
+  };
+
+  const confirmStopSeason = async () => {
+    if (!confirmStop) return;
+    await stopSeason(confirmStop.id);
+    if (activeSeasonId === confirmStop.id)
+      await setMetaValue("active_season_id", "");
+    setConfirmStop(null);
+    refresh();
+  };
+
+  const active = seasons.find((s) => s.id === activeSeasonId && s.isActive);
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 16 },
+      ]}
+    >
+      <Text style={styles.logo}>⚽ GAFFER</Text>
+      <Text style={styles.tagline}>Tactical match-day manager</Text>
+      {!isPremiumUnlocked() && (
+        <Text style={styles.premiumLock}>
+          🔒 Premium required for this build
+        </Text>
+      )}
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+      <ScrollView
+        contentContainerStyle={styles.body}
+        showsVerticalScrollIndicator={false}
+      >
+        {active && (
+          <Pressable
+            style={styles.resumeCard}
+            onPress={() => openSeason(active)}
+          >
+            <Text style={styles.resumeTitle}>Resume Season</Text>
+            <Text style={styles.resumeName}>{active.name}</Text>
+            <Text style={styles.resumeMeta}>
+              Active since {new Date(active.startDate).toLocaleDateString()}
+            </Text>
+          </Pressable>
+        )}
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        <Pressable
+          style={styles.primaryButton}
+          onPress={() => setShowNew(true)}
+        >
+          <Text style={styles.primaryButtonText}>+ Start a New Season</Text>
+        </Pressable>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+        <Text style={styles.sectionTitle}>Previous Seasons</Text>
+        {!loaded && <Text style={styles.empty}>Loading…</Text>}
+        {loaded && seasons.length === 0 && (
+          <Text style={styles.empty}>
+            No seasons yet. Create one to get started.
+          </Text>
+        )}
+        {seasons.map((s) => (
+          <View key={s.id} style={styles.seasonRow}>
+            <Pressable style={styles.seasonMain} onPress={() => openSeason(s)}>
+              <View style={styles.seasonInfo}>
+                <Text style={styles.seasonName}>
+                  {s.name}
+                  {s.isActive && (
+                    <Text style={styles.activeBadge}> ACTIVE</Text>
+                  )}
+                </Text>
+                <Text style={styles.seasonMeta}>
+                  {new Date(s.startDate).toLocaleDateString()}
+                  {s.endDate
+                    ? ` — ${new Date(s.endDate).toLocaleDateString()}`
+                    : " — ongoing"}
+                </Text>
+              </View>
+            </Pressable>
+            {s.isActive && (
+              <Pressable
+                style={styles.stopButton}
+                onPress={() => handleStopSeason(s)}
+              >
+                <Text style={styles.stopButtonText}>Stop</Text>
+              </Pressable>
+            )}
+          </View>
+        ))}
+      </ScrollView>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <Modal visible={showNew} transparent animationType="fade">
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Start a New Season</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Season name (e.g. Fall 2026 Rec)"
+              placeholderTextColor="#64748b"
+              value={newName}
+              onChangeText={setNewName}
+              autoFocus
+              returnKeyType="next"
+            />
+            <TextInput
+              style={[styles.input, styles.teamInput]}
+              placeholder="Your team name (e.g. Hedgehogs)"
+              placeholderTextColor="#64748b"
+              value={newTeamName}
+              onChangeText={setNewTeamName}
+              returnKeyType="done"
+              onSubmitEditing={handleCreate}
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.modalCancel}
+                onPress={() => setShowNew(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.modalConfirm} onPress={handleCreate}>
+                <Text style={styles.modalConfirmText}>Create</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={confirmStop !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setConfirmStop(null)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Stop this season?</Text>
+            <Text style={styles.confirmBody}>
+              {confirmStop?.name} will be marked inactive and its history will
+              be frozen.
+            </Text>
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.modalCancel}
+                onPress={() => setConfirmStop(null)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.stopConfirm} onPress={confirmStopSeason}>
+                <Text style={styles.stopConfirmText}>Stop Season</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: "#020617",
+    paddingHorizontal: 16,
   },
-  safeArea: {
+  logo: {
+    color: "#f8fafc",
+    fontSize: 30,
+    fontWeight: "900",
+    letterSpacing: 1,
+    textAlign: "center",
+  },
+  tagline: {
+    color: "#64748b",
+    fontSize: 13,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  premiumLock: {
+    color: "#fbbf24",
+    fontSize: 12,
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  body: {
+    paddingBottom: 24,
+  },
+  resumeCard: {
+    backgroundColor: "#14532d",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#166534",
+    padding: 14,
+    marginBottom: 12,
+  },
+  resumeTitle: {
+    color: "#86efac",
+    fontSize: 11,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  resumeName: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "900",
+    marginTop: 2,
+  },
+  resumeMeta: {
+    color: "#86efac",
+    fontSize: 11,
+    marginTop: 2,
+  },
+  primaryButton: {
+    backgroundColor: "#16a34a",
+    borderRadius: 14,
+    paddingVertical: 15,
+    alignItems: "center",
+    marginBottom: 22,
+  },
+  primaryButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  sectionTitle: {
+    color: "#94a3b8",
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    marginBottom: 8,
+  },
+  empty: {
+    color: "#475569",
+    fontSize: 13,
+    marginVertical: 8,
+  },
+  seasonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#0f172a",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#1e293b",
+    marginBottom: 8,
+    overflow: "hidden",
+  },
+  seasonMain: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    padding: 12,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  seasonInfo: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
   },
-  title: {
-    textAlign: 'center',
+  seasonName: {
+    color: "#f1f5f9",
+    fontSize: 15,
+    fontWeight: "800",
   },
-  code: {
-    textTransform: 'uppercase',
+  activeBadge: {
+    color: "#4ade80",
+    fontSize: 10,
+    fontWeight: "800",
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  seasonMeta: {
+    color: "#64748b",
+    fontSize: 11,
+    marginTop: 2,
+  },
+  stopButton: {
+    backgroundColor: "#7f1d1d",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginRight: 8,
+    borderRadius: 8,
+  },
+  stopButtonText: {
+    color: "#fecaca",
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    padding: 24,
+  },
+  modalCard: {
+    backgroundColor: "#0f172a",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#334155",
+    padding: 18,
+  },
+  modalTitle: {
+    color: "#f1f5f9",
+    fontSize: 16,
+    fontWeight: "800",
+    marginBottom: 12,
+  },
+  input: {
+    backgroundColor: "#1e293b",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: "#f1f5f9",
+    fontSize: 14,
+  },
+  teamInput: {
+    marginTop: 8,
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 14,
+  },
+  modalCancel: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  modalCancelText: {
+    color: "#94a3b8",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  confirmBody: {
+    color: "#94a3b8",
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 8,
+  },
+  stopConfirm: {
+    backgroundColor: "#991b1b",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  stopConfirmText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  modalConfirm: {
+    backgroundColor: "#16a34a",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+  },
+  modalConfirmText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "800",
   },
 });
