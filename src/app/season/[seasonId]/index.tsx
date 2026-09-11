@@ -220,11 +220,8 @@ export default function SeasonDashboard() {
         </View>
       </ScrollView>
 
-      <View
-        style={styles.modalBackdrop}
-        pointerEvents={confirmStop ? "auto" : "none"}
-      >
-        {confirmStop && (
+      {confirmStop && (
+        <View style={styles.modalBackdrop}>
           <View style={styles.confirmCard}>
             <Text style={styles.confirmTitle}>Stop this season?</Text>
             <Text style={styles.confirmBody}>
@@ -243,8 +240,8 @@ export default function SeasonDashboard() {
               </Pressable>
             </View>
           </View>
-        )}
-      </View>
+        </View>
+      )}
     </View>
   );
 }
