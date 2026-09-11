@@ -1,13 +1,14 @@
 // Season dashboard: roster with season-cumulative stats, match history,
 // live-match resume, and entry points to setup / storage management.
 
-import { setMetaValue } from "@/core/db";
+import { getMetaValue, setMetaValue } from "@/core/db";
 import {
   deletePlayer,
   findLiveMatch,
   getSeason,
   listMatches,
   listPlayers,
+  purgeSeason,
   stopSeason,
 } from "@/core/repo";
 import type { MatchSession, Player, Season } from "@/core/types";
@@ -34,6 +35,7 @@ export default function SeasonDashboard() {
   const [matches, setMatches] = useState<MatchSession[]>([]);
   const [liveMatch, setLiveMatch] = useState<MatchSession | null>(null);
   const [confirmStop, setConfirmStop] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!seasonId) return;
@@ -63,6 +65,15 @@ export default function SeasonDashboard() {
     await stopSeason(season.id);
     await setMetaValue("active_season_id", "");
     setConfirmStop(false);
+    router.replace("/");
+  };
+
+  const confirmDeleteSeason = async () => {
+    if (!season || !seasonId) return;
+    await purgeSeason(season.id);
+    const activeId = await getMetaValue("active_season_id");
+    if (activeId === season.id) await setMetaValue("active_season_id", "");
+    setConfirmDelete(false);
     router.replace("/");
   };
 
@@ -224,7 +235,47 @@ export default function SeasonDashboard() {
             </Pressable>
           ))}
         </View>
+
+        <View style={styles.dangerZone}>
+          <Text style={styles.dangerTitle}>Danger Zone</Text>
+          <Text style={styles.dangerBody}>
+            Permanently erase this season, its teams, rosters, matches, events,
+            and local stats.
+          </Text>
+          <Pressable
+            style={styles.deleteSeasonButton}
+            onPress={() => setConfirmDelete(true)}
+          >
+            <Text style={styles.deleteSeasonText}>Delete Season</Text>
+          </Pressable>
+        </View>
       </ScrollView>
+
+      {confirmDelete && (
+        <View style={styles.modalBackdrop}>
+          <View style={styles.confirmCard}>
+            <Text style={styles.confirmTitle}>Delete this season?</Text>
+            <Text style={styles.confirmBody}>
+              This permanently erases “{season?.name}” and all of its local
+              data. This cannot be undone.
+            </Text>
+            <View style={styles.confirmActions}>
+              <Pressable
+                style={styles.confirmCancel}
+                onPress={() => setConfirmDelete(false)}
+              >
+                <Text style={styles.confirmCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={styles.deleteConfirm}
+                onPress={confirmDeleteSeason}
+              >
+                <Text style={styles.deleteConfirmText}>Delete Everything</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      )}
 
       {confirmStop && (
         <View style={styles.modalBackdrop}>
@@ -501,5 +552,50 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 13,
     fontWeight: "800",
+  },
+  dangerZone: {
+    backgroundColor: "#1c0b0b",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#7f1d1d",
+    padding: 14,
+    marginBottom: 20,
+  },
+  dangerTitle: {
+    color: "#fca5a5",
+    fontSize: 12,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  dangerBody: {
+    color: "#cbd5e1",
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  deleteSeasonButton: {
+    alignSelf: "flex-start",
+    backgroundColor: "#991b1b",
+    borderRadius: 9,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
+  },
+  deleteSeasonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  deleteConfirm: {
+    backgroundColor: "#dc2626",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  deleteConfirmText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "900",
   },
 });
