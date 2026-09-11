@@ -76,7 +76,7 @@ export default function SeasonGate() {
     refresh();
   };
 
-  const active = seasons.find((s) => s.id === activeSeasonId && s.isActive);
+  const activeSeasons = seasons.filter((s) => s.isActive);
 
   return (
     <View
@@ -97,17 +97,27 @@ export default function SeasonGate() {
         contentContainerStyle={styles.body}
         showsVerticalScrollIndicator={false}
       >
-        {active && (
-          <Pressable
-            style={styles.resumeCard}
-            onPress={() => openSeason(active)}
-          >
-            <Text style={styles.resumeTitle}>Resume Season</Text>
-            <Text style={styles.resumeName}>{active.name}</Text>
-            <Text style={styles.resumeMeta}>
-              Active since {new Date(active.startDate).toLocaleDateString()}
+        {activeSeasons.length > 0 && (
+          <View style={styles.resumeGroup}>
+            <Text style={styles.resumeGroupTitle}>
+              Active Seasons ({activeSeasons.length})
             </Text>
-          </Pressable>
+            {activeSeasons.map((s) => (
+              <Pressable
+                key={s.id}
+                style={styles.resumeCard}
+                onPress={() => openSeason(s)}
+              >
+                <View style={styles.resumeInfo}>
+                  <Text style={styles.resumeName}>{s.name}</Text>
+                  <Text style={styles.resumeMeta}>
+                    Active since {new Date(s.startDate).toLocaleDateString()}
+                  </Text>
+                </View>
+                <Text style={styles.resumeArrow}>›</Text>
+              </Pressable>
+            ))}
+          </View>
         )}
 
         <Pressable
@@ -250,31 +260,44 @@ const styles = StyleSheet.create({
   body: {
     paddingBottom: 24,
   },
-  resumeCard: {
-    backgroundColor: "#14532d",
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#166534",
-    padding: 14,
-    marginBottom: 12,
+  resumeGroup: {
+    marginBottom: 16,
   },
-  resumeTitle: {
+  resumeGroupTitle: {
     color: "#86efac",
     fontSize: 11,
     fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: 0.6,
+    marginBottom: 8,
+  },
+  resumeCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#14532d",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#166534",
+    padding: 14,
+    marginBottom: 10,
+  },
+  resumeInfo: {
+    flex: 1,
   },
   resumeName: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "900",
-    marginTop: 2,
   },
   resumeMeta: {
     color: "#86efac",
     fontSize: 11,
     marginTop: 2,
+  },
+  resumeArrow: {
+    color: "#86efac",
+    fontSize: 20,
+    fontWeight: "800",
   },
   primaryButton: {
     backgroundColor: "#16a34a",

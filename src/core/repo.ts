@@ -69,11 +69,8 @@ export async function createSeason(name: string): Promise<Season> {
     season.name,
     season.startDate,
   );
-  // Only one season is active at a time.
-  await db.runAsync(
-    "UPDATE seasons SET is_active = 0 WHERE id <> ?",
-    season.id,
-  );
+  // Multiple seasons can be active concurrently (e.g. rec + competitive);
+  // each is ended individually with Stop Season.
   return season;
 }
 
