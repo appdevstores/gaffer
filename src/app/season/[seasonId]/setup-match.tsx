@@ -139,7 +139,8 @@ export default function SetupMatch() {
       await applyFormationSlots(match.id, formation);
       router.replace(`/season/${seasonId}/match/${match.id}`);
     } catch (e) {
-      setStartError("Could not start the match. Please try again.");
+      const detail = e instanceof Error ? e.message : "Unknown database error";
+      setStartError(`Could not start the match: ${detail}`);
       console.error("Start match failed:", e);
     }
   };

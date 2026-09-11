@@ -409,7 +409,7 @@ export async function createMatch(input: NewMatchInput): Promise<MatchSession> {
       extra_time_enabled, extra_time_half_minutes, extra_time_halves,
       home_score, away_score, elapsed_seconds, is_clock_active, stage_start_seconds,
       started_at, completed_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, ?, NULL)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, ?, NULL)`,
     match.id,
     match.seasonId,
     match.teamId,
