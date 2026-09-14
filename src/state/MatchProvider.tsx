@@ -79,6 +79,8 @@ interface MatchContextValue {
    * The equal-playing-time target for deciding who needs to come off.
    */
   fairShareSeconds: number;
+  showRotationBadges: boolean;
+  setShowRotationBadges(show: boolean): void;
 
   startClock(): void;
   stopClock(): void;
@@ -115,6 +117,7 @@ export function MatchProvider({ matchId, children }: Props) {
   const [events, setEvents] = useState<MatchEvent[]>([]);
   const [selectionId, setSelectionId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [showRotationBadges, setShowRotationBadges] = useState(true);
 
   const playersRef = useRef(players);
   playersRef.current = players;
@@ -127,6 +130,10 @@ export function MatchProvider({ matchId, children }: Props) {
     setNotice(msg);
     if (noticeTimer.current) clearTimeout(noticeTimer.current);
     noticeTimer.current = setTimeout(() => setNotice(null), 1800);
+  }, []);
+
+  const setRotationBadges = useCallback((show: boolean) => {
+    setShowRotationBadges(show);
   }, []);
 
   // ---- Load ----
@@ -694,6 +701,8 @@ export function MatchProvider({ matchId, children }: Props) {
       inStoppage,
       isRunning: Boolean(match?.isClockActive && isPlayingStage),
       fairShareSeconds,
+      showRotationBadges,
+      setShowRotationBadges: setRotationBadges,
       startClock,
       stopClock,
       transitionStage,
@@ -720,6 +729,8 @@ export function MatchProvider({ matchId, children }: Props) {
       inStoppage,
       isPlayingStage,
       fairShareSeconds,
+      showRotationBadges,
+      setRotationBadges,
       startClock,
       stopClock,
       transitionStage,

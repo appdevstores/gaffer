@@ -88,6 +88,7 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
     tapPitch,
     isRunning,
     fairShareSeconds,
+    showRotationBadges,
   } = useMatch();
 
   const { width: screenWidth } = useWindowDimensions();
@@ -707,7 +708,9 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
               size={tokenSize}
               totalSeconds={p.totalSeconds + p.shiftSeconds}
               stintSeconds={p.shiftSeconds}
-              rotationRank={rotationRanks.get(p.playerId)}
+              rotationRank={
+                showRotationBadges ? rotationRanks.get(p.playerId) : undefined
+              }
               charge={
                 fairShareSeconds > 0
                   ? Math.max(

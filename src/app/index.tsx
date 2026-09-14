@@ -9,14 +9,14 @@ import type { Season as SeasonType } from "@/core/types";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-    Image,
-    Modal,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -32,17 +32,20 @@ export default function SeasonGate() {
   const [confirmStop, setConfirmStop] = useState<SeasonType | null>(null);
 
   const refresh = useCallback(async () => {
-    const [list, active] = await Promise.all([
-      listSeasons(),
-      getMetaValue("active_season_id"),
-    ]);
-    setSeasons(list);
-    setActiveSeasonId(active);
-    setLoaded(true);
+    try {
+      const [list, active] = await Promise.all([
+        listSeasons(),
+        getMetaValue("active_season_id"),
+      ]);
+      setSeasons(list);
+      setActiveSeasonId(active);
+    } finally {
+      setLoaded(true);
+    }
   }, []);
 
   useEffect(() => {
-    refresh();
+    refresh().catch(() => {});
   }, [refresh]);
 
   const openSeason = async (s: SeasonType) => {

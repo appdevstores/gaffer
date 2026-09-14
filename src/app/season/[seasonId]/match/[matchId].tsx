@@ -41,6 +41,8 @@ function MatchShell() {
     addLateArrival,
     applyFormation,
     fairShareSeconds,
+    showRotationBadges,
+    setShowRotationBadges,
   } = useMatch();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cardTargetId, setCardTargetId] = useState<string | null>(null);
@@ -96,6 +98,27 @@ function MatchShell() {
               setSettingsOpen(false);
             }}
           />
+          <View style={styles.settingsOption}>
+            <View style={styles.settingsOptionCopy}>
+              <Text style={styles.settingsOptionTitle}>Rotation badges</Text>
+              <Text style={styles.settingsOptionSubtitle}>
+                Show who has been on the longest
+              </Text>
+            </View>
+            <Pressable
+              accessibilityRole="switch"
+              accessibilityState={{ checked: showRotationBadges }}
+              style={[styles.switch, showRotationBadges && styles.switchOn]}
+              onPress={() => setShowRotationBadges(!showRotationBadges)}
+            >
+              <View
+                style={[
+                  styles.switchThumb,
+                  showRotationBadges && styles.switchThumbOn,
+                ]}
+              />
+            </Pressable>
+          </View>
         </View>
       </View>
     </Modal>
@@ -325,6 +348,50 @@ const styles = StyleSheet.create({
     color: "#94a3b8",
     fontSize: 18,
     padding: 2,
+  },
+  settingsOption: {
+    marginTop: 16,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: "#1e293b",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  settingsOptionCopy: {
+    flex: 1,
+  },
+  settingsOptionTitle: {
+    color: "#e2e8f0",
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  settingsOptionSubtitle: {
+    color: "#64748b",
+    fontSize: 11,
+    marginTop: 3,
+  },
+  switch: {
+    width: 48,
+    height: 28,
+    borderRadius: 14,
+    padding: 3,
+    justifyContent: "center",
+    backgroundColor: "#334155",
+  },
+  switchOn: {
+    backgroundColor: "#2563eb",
+  },
+  switchThumb: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#cbd5e1",
+  },
+  switchThumbOn: {
+    alignSelf: "flex-end",
+    backgroundColor: "#fff",
   },
   phoneScoreboard: {
     paddingHorizontal: 10,
