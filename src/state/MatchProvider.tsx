@@ -273,8 +273,8 @@ export function MatchProvider({ matchId, children }: Props) {
       }
 
       if (next === "SECOND_HALF" || next === "EXTRA_TIME_2") {
-        // A new half changes ends, but the coach's tactical layout stays put.
-        toggleOrientationOnly();
+        // A new half changes ends and mirrors every active player 180° on the pitch.
+        applyFlip();
       }
 
       if (next === "FULL_TIME") {
@@ -306,7 +306,7 @@ export function MatchProvider({ matchId, children }: Props) {
           : prev,
       );
     },
-    [toggleOrientationOnly],
+    [applyFlip],
   );
 
   // ---- Two-tap substitution engine (§4 Rule A) ----
