@@ -568,9 +568,14 @@ export function MatchProvider({ matchId, children }: Props) {
       (a, b) => a.rosterOrder - b.rosterOrder,
     );
     const now = m.elapsedSeconds;
+    const sentOffCount = roster.filter((p) => p.sentOff).length;
+    const availableFieldCount = Math.max(
+      0,
+      formation.slots.length - sentOffCount,
+    );
     let slotIndex = 0;
     const next = roster.map((p) => {
-      if (!p.sentOff && slotIndex < formation.slots.length) {
+      if (!p.sentOff && slotIndex < availableFieldCount) {
         const slot = formation.slots[slotIndex++];
         return {
           ...p,

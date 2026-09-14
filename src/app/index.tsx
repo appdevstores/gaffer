@@ -30,6 +30,7 @@ export default function SeasonGate() {
   const [newName, setNewName] = useState("");
   const [newTeamName, setNewTeamName] = useState("");
   const [confirmStop, setConfirmStop] = useState<SeasonType | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -57,14 +58,21 @@ export default function SeasonGate() {
     const name = newName.trim();
     const team = newTeamName.trim();
     if (!name || !team) return;
-    const season = await createSeason(name);
-    await createTeam(season.id, team, 20);
-    await setMetaValue("active_season_id", season.id);
-    await setMetaValue("remembered_team_name", team);
-    setShowNew(false);
-    setNewName("");
-    setNewTeamName("");
-    router.push(`/season/${season.id}/teams`);
+    setCreateError(null);
+    try {
+      const season = await createSeason(name);
+      await createTeam(season.id, team, 20);
+      await setMetaValue("active_season_id", season.id);
+      await setMetaValue("remembered_team_name", team);
+      setShowNew(false);
+      setNewName("");
+      setNewTeamName("");
+      router.push(`/season/${season.id}/teams`);
+    } catch (error) {
+      setCreateError(
+        error instanceof Error ? error.message : "Could not create season.",
+      );
+    }
   };
 
   const handleStopSeason = (s: SeasonType) => {
@@ -194,6 +202,9 @@ export default function SeasonGate() {
               returnKeyType="done"
               onSubmitEditing={handleCreate}
             />
+            {createError && (
+              <Text style={styles.createError}>{createError}</Text>
+            )}
             <View style={styles.modalActions}>
               <Pressable
                 style={styles.modalCancel}
@@ -404,6 +415,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   teamInput: {
+    marginTop: 8,
+  },
+  createError: {
+    color: "#fca5a5",
+    fontSize: 12,
     marginTop: 8,
   },
   modalActions: {

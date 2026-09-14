@@ -221,7 +221,7 @@ export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
                 : `Who scored for ${match.teamName}?`}
             </Text>
             <ScrollView style={{ maxHeight: 320 }}>
-              {players.map((p) => (
+              {fieldPlayers.map((p) => (
                 <Pressable
                   key={p.playerId}
                   style={styles.scorerRow}
