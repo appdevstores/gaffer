@@ -12,10 +12,17 @@
 
 import { useMatch } from "@/state/MatchProvider";
 import { useMatchTheme } from "@/state/MatchTheme";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Animated,
   Easing,
+  PanResponder,
   Pressable,
   StyleSheet,
   Text,
@@ -30,6 +37,33 @@ import SoccerBall from "./SoccerBall";
 const PITCH = { w: 76, h: 92 }; // viewBox units
 const CENTER_CIRCLE_R = 6.6;
 const BALL_SIZE = 20;
+
+type DrawPoint = { x: number; y: number };
+type DrawStroke = DrawPoint[];
+
+function strokePath(points: DrawPoint[]): string {
+  if (points.length === 0) return "";
+  return points
+    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
+    .join(" ");
+}
+
+function arrowHead(points: DrawPoint[]): string {
+  if (points.length < 2) return "";
+  const end = points[points.length - 1];
+  const previous = points[Math.max(0, points.length - 5)];
+  const angle = Math.atan2(end.y - previous.y, end.x - previous.x);
+  const length = 3.2;
+  const left = {
+    x: end.x - length * Math.cos(angle - Math.PI / 6),
+    y: end.y - length * Math.sin(angle - Math.PI / 6),
+  };
+  const right = {
+    x: end.x - length * Math.cos(angle + Math.PI / 6),
+    y: end.y - length * Math.sin(angle + Math.PI / 6),
+  };
+  return `M ${left.x} ${left.y} L ${end.x} ${end.y} L ${right.x} ${right.y}`;
+}
 
 function pitchLines(containerW: number, containerH: number) {
   // Radii corrected so the center circle renders round at any aspect ratio.
@@ -60,6 +94,9 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
   const compact = screenWidth < 600;
 
   const [pitchSize, setPitchSize] = useState({ w: 0, h: 0 });
+  const [drawingMode, setDrawingMode] = useState(false);
+  const [strokes, setStrokes] = useState<DrawStroke[]>([]);
+  const currentStroke = useRef<DrawStroke>([]);
   const [stripHeight, setStripHeight] = useState(0);
   const [coachY, setCoachY] = useState({ head: 0.55, assistant: 0.3 });
 
@@ -70,6 +107,51 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
       : match?.gameFormat === "9v9"
         ? 38
         : TOKEN_SIZE;
+
+  const drawResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => drawingMode,
+        onMoveShouldSetPanResponder: () => drawingMode,
+        onPanResponderGrant: (event: any) => {
+          const w = pitchSize.w || 1;
+          const h = pitchSize.h || 1;
+          currentStroke.current = [
+            {
+              x: (event.nativeEvent.locationX / w) * PITCH.w,
+              y: (event.nativeEvent.locationY / h) * PITCH.h,
+            },
+          ];
+          setStrokes((existing) => [...existing, currentStroke.current]);
+        },
+        onPanResponderMove: (event: any) => {
+          const w = pitchSize.w || 1;
+          const h = pitchSize.h || 1;
+          const point = {
+            x: Math.max(
+              0,
+              Math.min(PITCH.w, (event.nativeEvent.locationX / w) * PITCH.w),
+            ),
+            y: Math.max(
+              0,
+              Math.min(PITCH.h, (event.nativeEvent.locationY / h) * PITCH.h),
+            ),
+          };
+          currentStroke.current = [...currentStroke.current, point];
+          setStrokes((existing) => [
+            ...existing.slice(0, -1),
+            currentStroke.current,
+          ]);
+        },
+        onPanResponderRelease: () => {
+          currentStroke.current = [];
+        },
+        onPanResponderTerminate: () => {
+          currentStroke.current = [];
+        },
+      }),
+    [drawingMode, pitchSize],
+  );
 
   // ---- per-token bounce values ----
   const bobs = useRef<Record<string, Animated.Value>>({});
@@ -496,10 +578,61 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
             strokeWidth={0.35}
             fill="none"
           />
+          {strokes.map((stroke, index) => (
+            <React.Fragment key={`stroke-${index}`}>
+              <Path
+                d={strokePath(stroke)}
+                stroke={theme.accent}
+                strokeWidth={1.1}
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <Path
+                d={arrowHead(stroke)}
+                stroke={theme.accent}
+                strokeWidth={1.1}
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </React.Fragment>
+          ))}
         </Svg>
 
+        {drawingMode && (
+          <View style={styles.drawOverlay} {...drawResponder.panHandlers} />
+        )}
+
+        <View style={styles.drawToolbar}>
+          <Pressable
+            style={[
+              styles.drawButton,
+              drawingMode && { backgroundColor: theme.accent },
+            ]}
+            onPress={() => setDrawingMode((active) => !active)}
+          >
+            <Text style={styles.drawButtonText}>
+              {drawingMode ? "Done" : "Draw"}
+            </Text>
+          </Pressable>
+          {strokes.length > 0 && (
+            <Pressable
+              style={[styles.drawButton, styles.clearButton]}
+              onPress={() => setStrokes([])}
+            >
+              <Text style={styles.drawButtonText}>Clear</Text>
+            </Pressable>
+          )}
+        </View>
+
         {/* ground tap layer (behind tokens) */}
-        <Pressable style={StyleSheet.absoluteFill} onPress={handleGroundTap} />
+        {!drawingMode && (
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={handleGroundTap}
+          />
+        )}
 
         {/* hint banner */}
         {selectionId && (
@@ -716,6 +849,38 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },
     elevation: 4,
+  },
+  drawOverlay: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 7,
+  },
+  drawToolbar: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    zIndex: 10,
+    flexDirection: "row",
+    gap: 5,
+  },
+  drawButton: {
+    backgroundColor: "rgba(15,23,42,0.9)",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.35)",
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+  clearButton: {
+    backgroundColor: "rgba(127,29,29,0.92)",
+  },
+  drawButtonText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "900",
   },
   hint: {
     position: "absolute",
