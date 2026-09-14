@@ -143,7 +143,7 @@ export default function BenchRoster({
             {p.playerName}
           </Text>
           <Text style={styles.tileMeta}>
-            #{p.jerseyNumber} · {formatClock(p.totalSeconds)}
+            {formatClock(p.totalSeconds)} total
           </Text>
           <Text style={[styles.tileBench, p.sentOff && styles.sentOffText]}>
             {p.sentOff ? "sent off" : `bench ${formatClock(benchStint(p))}`}
@@ -206,9 +206,7 @@ export default function BenchRoster({
           <Text style={styles.name} numberOfLines={1}>
             {p.playerName}
           </Text>
-          <Text style={styles.meta}>
-            #{p.jerseyNumber} · {formatClock(p.totalSeconds)}
-          </Text>
+          <Text style={styles.meta}>{formatClock(p.totalSeconds)} total</Text>
           <Text style={[styles.cardBench, p.sentOff && styles.sentOffText]}>
             {p.sentOff
               ? "🟥 sent off"

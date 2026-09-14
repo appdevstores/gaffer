@@ -156,12 +156,11 @@ export default function PlayerToken({
               />
             )}
             <Text
-              style={[styles.jersey, { fontSize: Math.round(size * 0.31) }]}
-            >
-              {player.jerseyNumber}
-            </Text>
-            <Text
-              style={[styles.initials, { fontSize: Math.round(size * 0.19) }]}
+              style={[
+                styles.initials,
+                styles.primaryInitials,
+                { fontSize: Math.round(size * 0.38) },
+              ]}
             >
               {avatarInitials(player.playerName)}
             </Text>
@@ -303,6 +302,12 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.85)",
     fontWeight: "600",
     lineHeight: 9,
+  },
+  primaryInitials: {
+    color: "#fff",
+    fontWeight: "900",
+    lineHeight: 20,
+    letterSpacing: 0.5,
   },
   name: {
     marginTop: 2,
