@@ -9,6 +9,7 @@
 import type {
   MatchEvent,
   MatchEventType,
+  MatchPlayer,
   MatchSession,
   MatchStage,
 } from "@/core/types";
@@ -74,6 +75,7 @@ interface ScoreboardProps {
 export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
   const {
     match,
+    players,
     events,
     perHalfSeconds,
     inStoppage,
@@ -100,6 +102,12 @@ export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
   const opponentGoalType: MatchEventType = teamIsHome
     ? "GOAL_AWAY"
     : "GOAL_HOME";
+  const ownGoalEvents = goalEvents.filter(
+    (event) => event.type === ownGoalType,
+  );
+  const opponentGoalEvents = goalEvents.filter(
+    (event) => event.type === opponentGoalType,
+  );
 
   // §space: tap-to-score. Home opens the scorer picker, away registers directly.
   const scoreSide = (
@@ -173,28 +181,25 @@ export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
       </View>
 
       {goalEvents.length > 0 && (
-        <View style={styles.goalEvents}>
-          {goalEvents.map((event) => {
-            const scorer = event.playerScorerId
-              ? (fieldPlayers.find((p) => p.playerId === event.playerScorerId)
-                  ?.playerName ?? "Unknown scorer")
-              : "No scorer credited";
-            return (
-              <Pressable
-                key={event.id}
-                style={styles.goalEvent}
-                onPress={() => {
-                  setEditingGoal(event);
-                  setScorerPicker(true);
-                }}
-              >
-                <Text style={styles.goalEventText}>
-                  ⚽ {formatClock(event.timestampSeconds)} · {scorer}
-                </Text>
-                <Text style={styles.goalEventEdit}>Edit</Text>
-              </Pressable>
-            );
-          })}
+        <View style={styles.goalColumns}>
+          <GoalColumn
+            title={match.teamName}
+            events={ownGoalEvents}
+            players={players}
+            onEdit={(event) => {
+              setEditingGoal(event);
+              setScorerPicker(true);
+            }}
+          />
+          <GoalColumn
+            title={match.opponentName}
+            events={opponentGoalEvents}
+            players={players}
+            onEdit={(event) => {
+              setEditingGoal(event);
+              setScorerPicker(true);
+            }}
+          />
         </View>
       )}
 
@@ -208,7 +213,7 @@ export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
                 : `Who scored for ${match.teamName}?`}
             </Text>
             <ScrollView style={{ maxHeight: 320 }}>
-              {fieldPlayers.map((p) => (
+              {players.map((p) => (
                 <Pressable
                   key={p.playerId}
                   style={styles.scorerRow}
@@ -263,6 +268,49 @@ export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
 }
 
 /** Center column: clock above the stage label, stoppage flips the clock red. */
+function GoalColumn({
+  title,
+  events,
+  players,
+  onEdit,
+}: {
+  title: string;
+  events: MatchEvent[];
+  players: MatchPlayer[];
+  onEdit: (event: MatchEvent) => void;
+}) {
+  return (
+    <View style={styles.goalColumn}>
+      <Text style={styles.goalColumnTitle} numberOfLines={1}>
+        {title}
+      </Text>
+      {events.length === 0 ? (
+        <Text style={styles.noGoals}>—</Text>
+      ) : (
+        events.map((event) => {
+          const scorer = event.playerScorerId
+            ? (players.find(
+                (player) => player.playerId === event.playerScorerId,
+              )?.playerName ?? "Unknown")
+            : "No scorer";
+          return (
+            <Pressable
+              key={event.id}
+              style={styles.goalEvent}
+              onPress={() => onEdit(event)}
+            >
+              <Text style={styles.goalEventText} numberOfLines={1}>
+                ⚽ {formatClock(event.timestampSeconds)} · {scorer}
+              </Text>
+              <Text style={styles.goalEventEdit}>Edit</Text>
+            </Pressable>
+          );
+        })
+      )}
+    </View>
+  );
+}
+
 function centerClock(inStoppage: boolean, seconds: number, stageLabel: string) {
   return (
     <View style={styles.center}>
@@ -359,9 +407,29 @@ const styles = StyleSheet.create({
   stageTextStoppage: {
     color: "#ef4444",
   },
-  goalEvents: {
+  goalColumns: {
+    flexDirection: "row",
+    gap: 6,
     marginTop: 6,
+  },
+  goalColumn: {
+    flex: 1,
     gap: 4,
+    minWidth: 0,
+  },
+  goalColumnTitle: {
+    color: "#94a3b8",
+    fontSize: 9,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  noGoals: {
+    color: "#475569",
+    backgroundColor: "#1e293b",
+    borderRadius: 7,
+    padding: 6,
+    fontSize: 11,
   },
   goalEvent: {
     flexDirection: "row",
