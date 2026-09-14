@@ -8,7 +8,7 @@
     "scheme": "gaffer",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "com.gaffer.app",
+      "bundleIdentifier": "com.gaffersoccer.app",
       "buildNumber": "4",
       "supportsTablet": true,
       "icon": "./assets/images/icon.png",
@@ -17,7 +17,7 @@
       }
     },
     "android": {
-      "package": "com.gaffer.app",
+      "package": "com.gaffersoccer.app",
       "versionCode": 4,
       "adaptiveIcon": {
         "backgroundColor": "#160b0b",
