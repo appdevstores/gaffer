@@ -8,21 +8,19 @@
     "scheme": "gaffer",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "com.gaffersoccer.app",
+      "bundleIdentifier": "com.gaffer.app",
       "buildNumber": "1",
       "supportsTablet": true,
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/images/icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.gaffersoccer.app",
+      "package": "com.gaffer.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#160b0b",
+        "foregroundImage": "./assets/images/icon.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -35,9 +33,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "backgroundColor": "#160b0b",
+          "image": "./assets/images/gaffer-logo.png",
+          "imageWidth": 160
         }
       ],
       "expo-sqlite"

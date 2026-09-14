@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1920" viewBox="0 0 1920 1920">
+      <defs>
+        <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#020617"/><stop offset=".55" stop-color="#111827"/><stop offset="1" stop-color="#450a0a"/></linearGradient>
+        <linearGradient id="red" x2="1" y2="1"><stop stop-color="#ef4444"/><stop offset="1" stop-color="#991b1b"/></linearGradient>
+        <filter id="shadow"><feDropShadow dy="28" stdDeviation="28" flood-color="#000" flood-opacity=".45"/></filter>
+      </defs>
+      <rect width="1920" height="1920" fill="url(#bg)"/>
+      <path d="M0 220h1920M0 520h1920M0 820h1920M0 1120h1920M0 1420h1920M220 0v1920M520 0v1920M820 0v1920M1120 0v1920M1420 0v1920M1720 0v1920" stroke="#94a3b8" stroke-opacity=".08" stroke-width="3"/>
+      <text x="960" y="118" fill="#fbbf24" font-family="Arial, Helvetica, sans-serif" font-size="26px" font-weight="800" text-anchor="middle" letter-spacing="5px">YOUR FORMATION, LIVE ON THE PITCH</text>
+      <text x="960" y="188" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="58px" font-weight="900" text-anchor="middle" letter-spacing="0px">Subs in two taps.</text>
+      <rect x="440" y="250" width="1040" height="1600" rx="72" fill="#020617" stroke="#fbbf24" stroke-opacity=".45" stroke-width="5" filter="url(#shadow)"/>
+      <rect x="470" y="280" width="980" height="1540" rx="48" fill="#0f172a"/>
+      <rect x="470" y="280" width="980" height="92" rx="48" fill="#160b0b"/>
+      <circle cx="960" cy="322" r="10" fill="#fbbf24"/>
+      <g transform="translate(510 397) scale(0.62)">
+      <path d="M120 10 220 55v70c0 62-39 111-100 141-61-30-100-79-100-141V55Z" fill="#160b0b" stroke="#fbbf24" stroke-width="8"/>
+      <path d="M120 28 199 63v61c0 48-28 84-79 111-51-27-79-63-79-111V63Z" fill="none" stroke="#ef4444" stroke-width="5"/>
+      <path d="M120 57 149 104h-16v43h-26v-43H91Z" fill="#fff7ed"/>
+      <path d="M92 147h56" stroke="#fff7ed" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="120" cy="130" r="33" fill="none" stroke="#fbbf24" stroke-width="4"/>
+    </g>
+      <text x="960" y="470" fill="#fff7ed" font-family="Arial, Helvetica, sans-serif" font-size="36px" font-weight="900" text-anchor="middle" letter-spacing="6px">GAFFER</text>
+      <text x="960" y="510" fill="#fbbf24" font-family="Arial, Helvetica, sans-serif" font-size="14px" font-weight="700" text-anchor="middle" letter-spacing="2px">TACTICAL MATCH-DAY MANAGER</text>
+      <text x="540" y="600" fill="#86efac" font-family="Arial, Helvetica, sans-serif" font-size="18px" font-weight="800" text-anchor="start" letter-spacing="2px">HEDGEHOGS</text>
+      <text x="960" y="660" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="64px" font-weight="900" text-anchor="middle" letter-spacing="0px">2  —  1</text>
+      <text x="960" y="700" fill="#fbbf24" font-family="Arial, Helvetica, sans-serif" font-size="18px" font-weight="800" text-anchor="middle" letter-spacing="2px">1ST HALF  •  24:18</text>
+      <rect x="520" y="750" width="880" height="650" rx="24" fill="#14532d" stroke="#4ade80" stroke-opacity=".55" stroke-width="4"/>
+      <rect x="555" y="785" width="810" height="580" fill="none" stroke="#bbf7d0" stroke-opacity=".65" stroke-width="3"/>
+      <path d="M960 785v580M555 1075h810M960 1030a45 45 0 1 1 0 90 45 45 0 0 1 0-90M555 950h115v250H555M1365 950h-115v250h115" fill="none" stroke="#bbf7d0" stroke-opacity=".6" stroke-width="3"/>
+      <g font-family="Arial,sans-serif" font-size="19" font-weight="900" text-anchor="middle"><circle cx="960" cy="855" r="38" fill="#2563eb" stroke="#facc15" stroke-width="6"/><text x="960" y="862" fill="#fff">9</text><circle cx="790" cy="990" r="38" fill="#2563eb" stroke="#facc15" stroke-width="6"/><text x="790" y="997" fill="#fff">7</text><circle cx="1130" cy="990" r="38" fill="#2563eb" stroke="#facc15" stroke-width="6"/><text x="1130" y="997" fill="#fff">11</text><circle cx="760" cy="1200" r="38" fill="#2563eb" stroke="#facc15" stroke-width="6"/><text x="760" y="1207" fill="#fff">4</text><circle cx="960" cy="1260" r="38" fill="#2563eb" stroke="#facc15" stroke-width="6"/><text x="960" y="1267" fill="#fff">6</text><circle cx="1160" cy="1200" r="38" fill="#2563eb" stroke="#facc15" stroke-width="6"/><text x="1160" y="1207" fill="#fff">8</text></g>
+      <rect x="520" y="1460" width="420" height="82" rx="20" fill="#2563eb"/>
+      <text x="730" y="1512" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="22px" font-weight="900" text-anchor="middle" letter-spacing="1px">TAP TO SUB</text>
+      <rect x="980" y="1460" width="420" height="82" rx="20" fill="#334155"/>
+      <text x="1190" y="1512" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="22px" font-weight="900" text-anchor="middle" letter-spacing="1px">GOAL  +</text>
+      <text x="960" y="1770" fill="#94a3b8" font-family="Arial, Helvetica, sans-serif" font-size="16px" font-weight="800" text-anchor="middle" letter-spacing="3px">GAFFER  •  100% OFFLINE</text>
+    </svg>

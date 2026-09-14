@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1920" viewBox="0 0 1920 1920">
+      <defs>
+        <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#020617"/><stop offset=".55" stop-color="#111827"/><stop offset="1" stop-color="#450a0a"/></linearGradient>
+        <linearGradient id="red" x2="1" y2="1"><stop stop-color="#ef4444"/><stop offset="1" stop-color="#991b1b"/></linearGradient>
+        <filter id="shadow"><feDropShadow dy="28" stdDeviation="28" flood-color="#000" flood-opacity=".45"/></filter>
+      </defs>
+      <rect width="1920" height="1920" fill="url(#bg)"/>
+      <path d="M0 220h1920M0 520h1920M0 820h1920M0 1120h1920M0 1420h1920M220 0v1920M520 0v1920M820 0v1920M1120 0v1920M1420 0v1920M1720 0v1920" stroke="#94a3b8" stroke-opacity=".08" stroke-width="3"/>
+      <text x="960" y="118" fill="#fbbf24" font-family="Arial, Helvetica, sans-serif" font-size="26px" font-weight="800" text-anchor="middle" letter-spacing="5px">FAIR-PLAY COACHING MADE SIMPLE</text>
+      <text x="960" y="188" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="58px" font-weight="900" text-anchor="middle" letter-spacing="0px">Every minute counts.</text>
+      <rect x="440" y="250" width="1040" height="1600" rx="72" fill="#020617" stroke="#fbbf24" stroke-opacity=".45" stroke-width="5" filter="url(#shadow)"/>
+      <rect x="470" y="280" width="980" height="1540" rx="48" fill="#0f172a"/>
+      <rect x="470" y="280" width="980" height="92" rx="48" fill="#160b0b"/>
+      <circle cx="960" cy="322" r="10" fill="#fbbf24"/>
+      <g transform="translate(510 397) scale(0.62)">
+      <path d="M120 10 220 55v70c0 62-39 111-100 141-61-30-100-79-100-141V55Z" fill="#160b0b" stroke="#fbbf24" stroke-width="8"/>
+      <path d="M120 28 199 63v61c0 48-28 84-79 111-51-27-79-63-79-111V63Z" fill="none" stroke="#ef4444" stroke-width="5"/>
+      <path d="M120 57 149 104h-16v43h-26v-43H91Z" fill="#fff7ed"/>
+      <path d="M92 147h56" stroke="#fff7ed" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="120" cy="130" r="33" fill="none" stroke="#fbbf24" stroke-width="4"/>
+    </g>
+      <text x="960" y="470" fill="#fff7ed" font-family="Arial, Helvetica, sans-serif" font-size="36px" font-weight="900" text-anchor="middle" letter-spacing="6px">GAFFER</text>
+      <text x="960" y="510" fill="#fbbf24" font-family="Arial, Helvetica, sans-serif" font-size="14px" font-weight="700" text-anchor="middle" letter-spacing="2px">TACTICAL MATCH-DAY MANAGER</text>
+      <text x="540" y="600" fill="#86efac" font-family="Arial, Helvetica, sans-serif" font-size="18px" font-weight="800" text-anchor="start" letter-spacing="2px">FAIR-PLAY ROTATION</text>
+      <text x="540" y="640" fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="29px" font-weight="900" text-anchor="start" letter-spacing="0px">Equal playing time, tracked live.</text>
+      <rect x="520" y="680" width="880" height="606" rx="24" fill="#0f172a" stroke="#334155" stroke-width="3"/>
+      <rect x="520" y="700" width="880" height="126" rx="20" fill="#1e293b"/>
+          <text x="562" y="742" fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="25px" font-weight="800" text-anchor="start" letter-spacing="0px">Alex Morgan</text>
+          <text x="562" y="779" fill="#94a3b8" font-family="Arial, Helvetica, sans-serif" font-size="18px" font-weight="600" text-anchor="start" letter-spacing="0px">18:00 played</text>
+          <rect x="900" y="743" width="410" height="18" rx="9" fill="#334155"/><rect x="900" y="743" width="311" height="18" rx="9" fill="#16a34a"/>
+          <text x="1340" y="759" fill="#16a34a" font-family="Arial, Helvetica, sans-serif" font-size="18px" font-weight="900" text-anchor="end" letter-spacing="0px">76%</text><rect x="520" y="850" width="880" height="126" rx="20" fill="#1e293b"/>
+          <text x="562" y="892" fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="25px" font-weight="800" text-anchor="start" letter-spacing="0px">Sam Carter</text>
+          <text x="562" y="929" fill="#94a3b8" font-family="Arial, Helvetica, sans-serif" font-size="18px" font-weight="600" text-anchor="start" letter-spacing="0px">14:30 played</text>
+          <rect x="900" y="893" width="410" height="18" rx="9" fill="#334155"/><rect x="900" y="893" width="250" height="18" rx="9" fill="#f59e0b"/>
+          <text x="1340" y="909" fill="#f59e0b" font-family="Arial, Helvetica, sans-serif" font-size="18px" font-weight="900" text-anchor="end" letter-spacing="0px">61%</text><rect x="520" y="1000" width="880" height="126" rx="20" fill="#1e293b"/>
+          <text x="562" y="1042" fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="25px" font-weight="800" text-anchor="start" letter-spacing="0px">Jordan Lee</text>
+          <text x="562" y="1079" fill="#94a3b8" font-family="Arial, Helvetica, sans-serif" font-size="18px" font-weight="600" text-anchor="start" letter-spacing="0px">09:45 played</text>
+          <rect x="900" y="1043" width="410" height="18" rx="9" fill="#334155"/><rect x="900" y="1043" width="172" height="18" rx="9" fill="#ef4444"/>
+          <text x="1340" y="1059" fill="#ef4444" font-family="Arial, Helvetica, sans-serif" font-size="18px" font-weight="900" text-anchor="end" letter-spacing="0px">42%</text><rect x="520" y="1150" width="880" height="126" rx="20" fill="#1e293b"/>
+          <text x="562" y="1192" fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="25px" font-weight="800" text-anchor="start" letter-spacing="0px">Taylor Kim</text>
+          <text x="562" y="1229" fill="#94a3b8" font-family="Arial, Helvetica, sans-serif" font-size="18px" font-weight="600" text-anchor="start" letter-spacing="0px">08:15 played</text>
+          <rect x="900" y="1193" width="410" height="18" rx="9" fill="#334155"/><rect x="900" y="1193" width="143" height="18" rx="9" fill="#ef4444"/>
+          <text x="1340" y="1209" fill="#ef4444" font-family="Arial, Helvetica, sans-serif" font-size="18px" font-weight="900" text-anchor="end" letter-spacing="0px">35%</text>
+      <rect x="520" y="1360" width="880" height="108" rx="20" fill="#14532d"/>
+      <text x="560" y="1408" fill="#86efac" font-family="Arial, Helvetica, sans-serif" font-size="17px" font-weight="800" text-anchor="start" letter-spacing="2px">MATCH TARGET</text>
+      <text x="560" y="1442" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="27px" font-weight="900" text-anchor="start" letter-spacing="0px">15:00 per player</text>
+      <text x="1320" y="1428" fill="#86efac" font-family="Arial, Helvetica, sans-serif" font-size="20px" font-weight="900" text-anchor="end" letter-spacing="2px">LIVE</text>
+      <text x="960" y="1770" fill="#94a3b8" font-family="Arial, Helvetica, sans-serif" font-size="16px" font-weight="800" text-anchor="middle" letter-spacing="3px">GAFFER  •  100% OFFLINE</text>
+    </svg>

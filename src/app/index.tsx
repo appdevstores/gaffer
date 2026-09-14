@@ -9,13 +9,14 @@ import type { Season as SeasonType } from "@/core/types";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+    Image,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -85,7 +86,11 @@ export default function SeasonGate() {
         { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 16 },
       ]}
     >
-      <Text style={styles.logo}>⚽ GAFFER</Text>
+      <Image
+        source={require("../../assets/images/gaffer-logo.png")}
+        style={styles.logoImage}
+        accessibilityLabel="Gaffer logo"
+      />
       <Text style={styles.tagline}>Tactical match-day manager</Text>
       {!isPremiumUnlocked() && (
         <Text style={styles.premiumLock}>
@@ -238,12 +243,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#020617",
     paddingHorizontal: 16,
   },
-  logo: {
-    color: "#f8fafc",
-    fontSize: 30,
-    fontWeight: "900",
-    letterSpacing: 1,
-    textAlign: "center",
+  logoImage: {
+    width: 96,
+    height: 96,
+    borderRadius: 18,
+    alignSelf: "center",
+    marginBottom: 8,
   },
   tagline: {
     color: "#64748b",
