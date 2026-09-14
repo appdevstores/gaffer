@@ -24,6 +24,8 @@ interface Props {
   totalSeconds?: number;
   /** Current stint seconds (since subbed in) — cyan badge. */
   stintSeconds?: number;
+  /** Current-stint rotation order: 1 is the player who has been on longest. */
+  rotationRank?: number;
   /**
    * Remaining fair-share charge 0..1 (1 = fresh, 0 = played their average).
    * Drives the ring tint (amber → red) and the battery bar.
@@ -53,6 +55,7 @@ export default function PlayerToken({
   size = TOKEN_SIZE,
   totalSeconds,
   stintSeconds,
+  rotationRank,
   charge,
   selected,
   isTarget,
@@ -85,6 +88,14 @@ export default function PlayerToken({
           ? "#fbbf24"
           : "#ef4444";
   const boltLow = charge !== undefined && charge <= 0.25;
+  const rotationColor =
+    rotationRank === 1
+      ? "#ef4444"
+      : rotationRank === 2
+        ? "#f97316"
+        : rotationRank === 3
+          ? "#facc15"
+          : "#4ade80";
   return (
     <Pressable
       onPress={onPress}
@@ -111,6 +122,14 @@ export default function PlayerToken({
                 ringStyle,
               ]}
             />
+          )}
+          {rotationRank !== undefined && (
+            <View
+              style={[styles.rotationBadge, { backgroundColor: rotationColor }]}
+              pointerEvents="none"
+            >
+              <Text style={styles.rotationText}>↻{rotationRank}</Text>
+            </View>
           )}
           {isTarget && !selected && (
             <Animated.View
@@ -422,6 +441,25 @@ const styles = StyleSheet.create({
     position: "absolute",
     borderWidth: 3,
     borderColor: "#facc15",
+  },
+  rotationBadge: {
+    position: "absolute",
+    top: -7,
+    left: -7,
+    minWidth: 22,
+    height: 18,
+    paddingHorizontal: 4,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: "#fff",
+    zIndex: 8,
+  },
+  rotationText: {
+    color: "#0f172a",
+    fontSize: 10,
+    fontWeight: "900",
   },
   targetRing: {
     position: "absolute",

@@ -324,6 +324,19 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
     ? fieldPlayers.find((p) => p.playerId === selectionId)
     : null;
 
+  // Current-stint rotation order: longest active stint is rank 1.
+  const rotationRanks = useMemo(() => {
+    const ordered = [...fieldPlayers].sort(
+      (a, b) =>
+        b.shiftSeconds - a.shiftSeconds ||
+        (a.shiftStartSeconds ?? Number.MAX_SAFE_INTEGER) -
+          (b.shiftStartSeconds ?? Number.MAX_SAFE_INTEGER),
+    );
+    return new Map(
+      ordered.map((player, index) => [player.playerId, index + 1]),
+    );
+  }, [fieldPlayers]);
+
   return (
     <View
       style={[
@@ -561,6 +574,7 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
               size={tokenSize}
               totalSeconds={p.totalSeconds + p.shiftSeconds}
               stintSeconds={p.shiftSeconds}
+              rotationRank={rotationRanks.get(p.playerId)}
               charge={
                 fairShareSeconds > 0
                   ? Math.max(
