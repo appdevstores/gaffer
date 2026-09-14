@@ -278,6 +278,31 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
     return () => spinLoop.current?.stop();
   }, [isRunning, spin]);
 
+  // Coach shouts — both coaches bark the same one-word instruction in sync
+  // while the clock runs, cycling the command list every few seconds.
+  const SHOUT_WORDS = [
+    "run",
+    "pass",
+    "shoot",
+    "away",
+    "press",
+    "hold",
+    "switch",
+    "clear",
+  ];
+  const [shoutIndex, setShoutIndex] = useState(0);
+  useEffect(() => {
+    if (!isRunning) {
+      setShoutIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setShoutIndex((i) => (i + 1) % SHOUT_WORDS.length);
+    }, 3600);
+    return () => clearInterval(interval);
+  }, [isRunning]);
+  const shout = isRunning ? SHOUT_WORDS[shoutIndex] : null;
+
   const flipped = match?.fieldOrientation === "FLIPPED";
   const { rx, ry } = pitchLines(pitchSize.w || 1, pitchSize.h || 1);
 
@@ -308,6 +333,7 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
           coachY={coachY}
           onCoachY={setCoachY}
           paceStyle={paceStyle}
+          shout={shout}
         />
       )}
 
@@ -573,6 +599,7 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
           coachY={coachY}
           onCoachY={setCoachY}
           paceStyle={paceStyle}
+          shout={shout}
         />
       )}
     </View>
@@ -586,6 +613,7 @@ function TechnicalStrip({
   coachY,
   onCoachY,
   paceStyle,
+  shout,
 }: {
   compact: boolean;
   height: number;
@@ -595,6 +623,7 @@ function TechnicalStrip({
   paceStyle: (key: "head" | "assistant") => {
     transform: { translateY: any }[];
   };
+  shout: string | null;
 }) {
   return (
     <View
@@ -609,6 +638,7 @@ function TechnicalStrip({
       <CoachToken
         label="Head Coach"
         hat="big"
+        shout={shout}
         baseY={coachY.head}
         trackHeight={height}
         onChangeBaseY={(y) => onCoachY({ ...coachY, head: y })}
@@ -617,6 +647,7 @@ function TechnicalStrip({
       <CoachToken
         label="Asst. Coach"
         hat="small"
+        shout={shout}
         baseY={coachY.assistant}
         trackHeight={height}
         onChangeBaseY={(y) => onCoachY({ ...coachY, assistant: y })}

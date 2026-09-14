@@ -7,13 +7,13 @@
 
 import { useRef } from "react";
 import {
-  Animated,
-  PanResponder,
-  StyleSheet,
-  Text,
-  View,
-  type StyleProp,
-  type ViewStyle,
+    Animated,
+    PanResponder,
+    StyleSheet,
+    Text,
+    View,
+    type StyleProp,
+    type ViewStyle,
 } from "react-native";
 import Svg, { Circle, Rect } from "react-native-svg";
 
@@ -21,6 +21,8 @@ interface Props {
   label: string;
   /** 'big' → head coach's wide-brimmed hat, 'small' → assistant's cap. */
   hat: "big" | "small";
+  /** One-word instruction shown in a speech bubble while the clock runs. */
+  shout?: string | null;
   /** Base position along the track, 0 (top) .. 1 (bottom). */
   baseY: number;
   trackHeight: number;
@@ -63,6 +65,7 @@ function CoachAvatar({ hat }: { hat: "big" | "small" }) {
 export default function CoachToken({
   label,
   hat,
+  shout,
   baseY,
   trackHeight,
   onChangeBaseY,
@@ -86,6 +89,12 @@ export default function CoachToken({
       style={[styles.positioner, { top: `${baseY * 100}%` }]}
     >
       <Animated.View style={[styles.inner, paceStyle]}>
+        {shout && (
+          <View style={styles.bubble} pointerEvents="none">
+            <Text style={styles.bubbleText}>{shout}</Text>
+            <View style={styles.bubbleTail} />
+          </View>
+        )}
         <View style={styles.avatar}>
           <CoachAvatar hat={hat} />
         </View>
@@ -128,5 +137,36 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
     maxWidth: 64,
+  },
+  bubble: {
+    position: "absolute",
+    bottom: TOKEN_SIZE + 8,
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    borderRadius: 8,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 4,
+  },
+  bubbleText: {
+    color: "#0f172a",
+    fontSize: 12,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  bubbleTail: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
+    borderTopWidth: 6,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: "#f8fafc",
   },
 });
