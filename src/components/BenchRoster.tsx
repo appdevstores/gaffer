@@ -400,11 +400,11 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   tile: {
-    width: 74,
+    width: 68,
     backgroundColor: "#1e293b",
     borderRadius: 10,
-    paddingVertical: 7,
-    paddingHorizontal: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 3,
     alignItems: "center",
     position: "relative",
   },
@@ -425,10 +425,10 @@ const styles = StyleSheet.create({
   },
   tileName: {
     color: "#f1f5f9",
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: "700",
-    marginTop: 3,
-    maxWidth: 70,
+    marginTop: 2,
+    maxWidth: 64,
   },
   tileMeta: {
     color: "#94a3b8",
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   },
   tileBench: {
     color: "#67e8f9", // cyan = current bench stint
-    fontSize: 8,
+    fontSize: 7,
     fontWeight: "700",
     marginTop: 1,
     fontVariant: ["tabular-nums"],

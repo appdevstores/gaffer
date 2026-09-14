@@ -403,8 +403,8 @@ const styles = StyleSheet.create({
     paddingBottom: 6,
   },
   phoneBench: {
-    height: 244,
+    height: 220,
     paddingHorizontal: 10,
-    paddingBottom: 10,
+    paddingBottom: 8,
   },
 });

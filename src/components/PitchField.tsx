@@ -912,7 +912,7 @@ const styles = StyleSheet.create({
     paddingTop: 6,
   },
   techStripCompact: {
-    width: 44,
+    width: 36,
     paddingTop: 0,
   },
   techLabel: {
