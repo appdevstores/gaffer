@@ -12,6 +12,7 @@ import PitchField from "@/components/PitchField";
 import Scoreboard from "@/components/Scoreboard";
 import { getFormation } from "@/lib/formations";
 import { MatchProvider, useMatch } from "@/state/MatchProvider";
+import { MatchThemeProvider, useMatchTheme } from "@/state/MatchTheme";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -26,6 +27,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function MatchShell() {
+  const { theme, toggleTheme } = useMatchTheme();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -100,20 +102,33 @@ function MatchShell() {
   );
 
   const header = (
-    <View style={[styles.topBar, { paddingTop: insets.top + 6 }]}>
+    <View
+      style={[
+        styles.topBar,
+        { paddingTop: insets.top + 6 },
+        { backgroundColor: theme.root },
+      ]}
+    >
       <Pressable onPress={() => router.push(`/season/${seasonId}`)} hitSlop={8}>
         <Text style={styles.backText}>‹ Dashboard</Text>
       </Pressable>
       <Text style={styles.topBarTitle} numberOfLines={1}>
         {match.teamName} vs {match.opponentName}
       </Text>
-      <View style={styles.topBarSpacer} />
+      <Pressable
+        style={[styles.themeToggle, { backgroundColor: theme.surfaceAlt }]}
+        onPress={toggleTheme}
+      >
+        <Text style={styles.themeToggleText}>
+          {theme.name === "professional" ? "🎨" : "🧭"}
+        </Text>
+      </Pressable>
     </View>
   );
 
   if (fullTime) {
     return (
-      <View style={styles.root}>
+      <View style={[styles.root, { backgroundColor: theme.root }]}>
         {header}
         <MatchSummary />
       </View>
@@ -122,7 +137,7 @@ function MatchShell() {
 
   if (isTablet) {
     return (
-      <View style={styles.root}>
+      <View style={[styles.root, { backgroundColor: theme.root }]}>
         {header}
         <View style={styles.tabletRow}>
           <View style={styles.tabletCanvas}>
@@ -158,7 +173,7 @@ function MatchShell() {
   // Phone: vertical stack — scoreboard, pitch, then an always-visible bench
   // grid (no sideways scrolling; extra subs scroll vertically inside it).
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: theme.root }]}>
       {header}
       <View style={styles.phoneScoreboard}>
         <Scoreboard dense onOpenSettings={() => setSettingsOpen(true)} />
@@ -188,9 +203,11 @@ export default function MatchScreen() {
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
   if (!matchId) return null;
   return (
-    <MatchProvider matchId={matchId}>
-      <MatchShell />
-    </MatchProvider>
+    <MatchThemeProvider>
+      <MatchProvider matchId={matchId}>
+        <MatchShell />
+      </MatchProvider>
+    </MatchThemeProvider>
   );
 }
 
@@ -219,8 +236,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginHorizontal: 8,
   },
-  topBarSpacer: {
-    width: 70,
+  themeToggle: {
+    width: 38,
+    height: 32,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#475569",
+  },
+  themeToggleText: {
+    fontSize: 16,
   },
   tabletRow: {
     flex: 1,

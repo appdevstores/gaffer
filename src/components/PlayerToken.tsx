@@ -4,6 +4,7 @@
 
 import type { MatchPlayer } from "@/core/types";
 import { avatarColor, avatarInitials } from "@/lib/avatars";
+import { useMatchTheme } from "@/state/MatchTheme";
 import {
   Animated,
   Pressable,
@@ -63,6 +64,7 @@ export default function PlayerToken({
   ringStyle,
   highlightRingStyle,
 }: Props) {
+  const { theme } = useMatchTheme();
   const color = avatarColor(player.avatarSeed);
   const ringInset = Math.round(size * 0.14);
 
@@ -98,6 +100,7 @@ export default function PlayerToken({
             <Animated.View
               style={[
                 styles.selectionRing,
+                { borderColor: theme.tokenRing },
                 {
                   top: -ringInset,
                   left: -ringInset,

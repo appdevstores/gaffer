@@ -15,6 +15,7 @@ import type {
 } from "@/core/types";
 import { formatClock } from "@/lib/mailto";
 import { useMatch } from "@/state/MatchProvider";
+import { useMatchTheme } from "@/state/MatchTheme";
 import { useState } from "react";
 import {
   Modal,
@@ -73,6 +74,7 @@ interface ScoreboardProps {
 }
 
 export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
+  const { theme } = useMatchTheme();
   const {
     match,
     players,
@@ -133,7 +135,13 @@ export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
   );
 
   return (
-    <View style={[styles.container, dense && styles.containerDense]}>
+    <View
+      style={[
+        styles.container,
+        dense && styles.containerDense,
+        { backgroundColor: theme.surface, borderColor: theme.border },
+      ]}
+    >
       <View style={styles.topRow}>
         {/* Team and opponent stay in fixed columns; flipping never re-centers or swaps them. */}
         {scoreSide(

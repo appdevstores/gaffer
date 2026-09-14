@@ -11,6 +11,7 @@
 // players (1.2s interpolation). Everything freezes the instant the clock stops.
 
 import { useMatch } from "@/state/MatchProvider";
+import { useMatchTheme } from "@/state/MatchTheme";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
@@ -44,6 +45,7 @@ interface PitchFieldProps {
 }
 
 export default function PitchField({ onCardPress }: PitchFieldProps) {
+  const { theme } = useMatchTheme();
   const {
     match,
     fieldPlayers,
@@ -323,7 +325,15 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
     : null;
 
   return (
-    <View style={styles.wrapper}>
+    <View
+      style={[
+        styles.wrapper,
+        {
+          backgroundColor: theme.pitchBackground,
+          borderColor: theme.pitchBorder,
+        },
+      ]}
+    >
       {/* Technical Area strip — §4 Rule C: pinned outside the field lines */}
       {flipped && (
         <TechnicalStrip

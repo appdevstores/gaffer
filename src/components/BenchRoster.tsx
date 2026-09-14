@@ -5,6 +5,7 @@
 import type { MatchPlayer } from "@/core/types";
 import { avatarColor, avatarInitials } from "@/lib/avatars";
 import { formatClock } from "@/lib/mailto";
+import { useMatchTheme } from "@/state/MatchTheme";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -42,6 +43,7 @@ export default function BenchRoster({
   horizontal,
   compact,
 }: Props) {
+  const { theme } = useMatchTheme();
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
   const [jersey, setJersey] = useState("");
@@ -252,7 +254,12 @@ export default function BenchRoster({
   );
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: theme.benchSurface, borderColor: theme.border },
+      ]}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Subs Bench</Text>
         <View style={styles.headerRight}>
