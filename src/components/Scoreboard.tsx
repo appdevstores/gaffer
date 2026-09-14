@@ -6,7 +6,12 @@
 // - The clock keeps counting through stoppage; the display turns bright red.
 // - Score title alignment swaps with the field orientation (§6.B).
 
-import type { MatchEventType, MatchSession, MatchStage } from "@/core/types";
+import type {
+  MatchEvent,
+  MatchEventType,
+  MatchSession,
+  MatchStage,
+} from "@/core/types";
 import { formatClock } from "@/lib/mailto";
 import { useMatch } from "@/state/MatchProvider";
 import { useState } from "react";
@@ -69,16 +74,23 @@ interface ScoreboardProps {
 export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
   const {
     match,
+    events,
     perHalfSeconds,
     inStoppage,
     transitionStage,
     registerGoal,
+    editGoalScorer,
     flipField,
     fieldPlayers,
   } = useMatch();
 
   const [scorerPicker, setScorerPicker] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<MatchEvent | null>(null);
   if (!match) return null;
+
+  const goalEvents = events.filter(
+    (event) => event.type === "GOAL_HOME" || event.type === "GOAL_AWAY",
+  );
 
   const stageAction = getStageAction(match);
   const teamIsHome = match.teamSide === "HOME";
@@ -116,8 +128,11 @@ export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
     <View style={[styles.container, dense && styles.containerDense]}>
       <View style={styles.topRow}>
         {/* Team and opponent stay in fixed columns; flipping never re-centers or swaps them. */}
-        {scoreSide(match.teamName, teamScore, "left", () =>
-          setScorerPicker(true),
+        {scoreSide(
+          match.teamName,
+          teamScore,
+          "left",
+          () => (setEditingGoal(null), setScorerPicker(true)),
         )}
         {centerClock(
           inStoppage,
@@ -157,12 +172,40 @@ export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
         )}
       </View>
 
-      {/* Scorer selection for HOME goals */}
+      {goalEvents.length > 0 && (
+        <View style={styles.goalEvents}>
+          {goalEvents.map((event) => {
+            const scorer = event.playerScorerId
+              ? (fieldPlayers.find((p) => p.playerId === event.playerScorerId)
+                  ?.playerName ?? "Unknown scorer")
+              : "No scorer credited";
+            return (
+              <Pressable
+                key={event.id}
+                style={styles.goalEvent}
+                onPress={() => {
+                  setEditingGoal(event);
+                  setScorerPicker(true);
+                }}
+              >
+                <Text style={styles.goalEventText}>
+                  ⚽ {formatClock(event.timestampSeconds)} · {scorer}
+                </Text>
+                <Text style={styles.goalEventEdit}>Edit</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
+
+      {/* Scorer selection for new goals or correcting a logged goal */}
       <Modal visible={scorerPicker} transparent animationType="fade">
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>
-              Who scored for {match.teamName}?
+              {editingGoal
+                ? "Correct scorer"
+                : `Who scored for ${match.teamName}?`}
             </Text>
             <ScrollView style={{ maxHeight: 320 }}>
               {fieldPlayers.map((p) => (
@@ -170,8 +213,13 @@ export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
                   key={p.playerId}
                   style={styles.scorerRow}
                   onPress={() => {
-                    registerGoal(ownGoalType, p.playerId);
+                    if (editingGoal) {
+                      editGoalScorer(editingGoal.id, p.playerId);
+                    } else {
+                      registerGoal(ownGoalType, p.playerId);
+                    }
                     setScorerPicker(false);
+                    setEditingGoal(null);
                   }}
                 >
                   <Text style={styles.scorerName}>
@@ -187,15 +235,23 @@ export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
                 { borderTopWidth: 1, borderTopColor: "#1e293b" },
               ]}
               onPress={() => {
-                registerGoal(ownGoalType, null);
+                if (editingGoal) {
+                  editGoalScorer(editingGoal.id, null);
+                } else {
+                  registerGoal(ownGoalType, null);
+                }
                 setScorerPicker(false);
+                setEditingGoal(null);
               }}
             >
               <Text style={styles.scorerName}>Own goal / no credit</Text>
             </Pressable>
             <Pressable
               style={styles.modalClose}
-              onPress={() => setScorerPicker(false)}
+              onPress={() => {
+                setScorerPicker(false);
+                setEditingGoal(null);
+              }}
             >
               <Text style={styles.modalCloseText}>Cancel</Text>
             </Pressable>
@@ -302,6 +358,29 @@ const styles = StyleSheet.create({
   },
   stageTextStoppage: {
     color: "#ef4444",
+  },
+  goalEvents: {
+    marginTop: 6,
+    gap: 4,
+  },
+  goalEvent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#1e293b",
+    borderRadius: 7,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+  },
+  goalEventText: {
+    color: "#cbd5e1",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  goalEventEdit: {
+    color: "#60a5fa",
+    fontSize: 10,
+    fontWeight: "800",
   },
   actionRow: {
     flexDirection: "row",

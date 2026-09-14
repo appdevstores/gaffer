@@ -4,15 +4,15 @@
 import { getDb } from "./db";
 import { uuid } from "./id";
 import type {
-  GameFormat,
-  MatchEvent,
-  MatchEventType,
-  MatchPlayer,
-  MatchSession,
-  MatchStage,
-  Player,
-  Season,
-  Team,
+    GameFormat,
+    MatchEvent,
+    MatchEventType,
+    MatchPlayer,
+    MatchSession,
+    MatchStage,
+    Player,
+    Season,
+    Team,
 } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -735,6 +735,18 @@ export async function listMatchEvents(matchId: string): Promise<MatchEvent[]> {
     matchId,
   );
   return rows.map(mapEvent);
+}
+
+export async function updateMatchEventScorer(
+  eventId: string,
+  playerScorerId: string | null,
+): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    "UPDATE match_events SET player_scorer_id = ? WHERE id = ? AND type IN ('GOAL_HOME', 'GOAL_AWAY')",
+    playerScorerId,
+    eventId,
+  );
 }
 
 // ---------------------------------------------------------------------------

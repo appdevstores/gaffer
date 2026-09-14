@@ -12,6 +12,7 @@ import {
   getMatchPlayers,
   listMatchEvents,
   updateMatch,
+  updateMatchEventScorer,
   upsertMatchPlayer,
 } from "@/core/repo";
 import type {
@@ -86,6 +87,7 @@ interface MatchContextValue {
   clearSelection(): void;
   tapPitch(xPct: number, yPct: number, inTechnicalArea: boolean): void;
   registerGoal(type: MatchEventType, scorerId: string | null): void;
+  editGoalScorer(eventId: string, scorerId: string | null): void;
   /** Give a yellow or red card. A 2nd yellow auto-converts to red (sent off). */
   giveCard(playerId: string, kind: "yellow" | "red"): void;
   flipField(): void;
@@ -470,6 +472,33 @@ export function MatchProvider({ matchId, children }: Props) {
     [],
   );
 
+  const editGoalScorer = useCallback(
+    (eventId: string, scorerId: string | null) => {
+      const event = events.find(
+        (item) =>
+          item.id === eventId &&
+          (item.type === "GOAL_HOME" || item.type === "GOAL_AWAY"),
+      );
+      if (!event) return;
+      updateMatchEventScorer(eventId, scorerId).catch(() => {});
+      setEvents((prev) =>
+        prev.map((item) =>
+          item.id === eventId ? { ...item, playerScorerId: scorerId } : item,
+        ),
+      );
+      setPlayers((prev) =>
+        prev.map((player) => {
+          let goals = player.goals;
+          if (event.playerScorerId === player.playerId)
+            goals = Math.max(0, goals - 1);
+          if (scorerId === player.playerId) goals += 1;
+          return goals === player.goals ? player : { ...player, goals };
+        }),
+      );
+    },
+    [events],
+  );
+
   // ---- Cards ----
   const giveCard = useCallback((playerId: string, kind: "yellow" | "red") => {
     const m = matchRef.current;
@@ -672,6 +701,7 @@ export function MatchProvider({ matchId, children }: Props) {
       clearSelection: () => setSelectionId(null),
       tapPitch,
       registerGoal,
+      editGoalScorer,
       giveCard,
       flipField,
       applyFormation,
@@ -696,6 +726,7 @@ export function MatchProvider({ matchId, children }: Props) {
       selectPlayer,
       tapPitch,
       registerGoal,
+      editGoalScorer,
       giveCard,
       flipField,
       applyFormation,
