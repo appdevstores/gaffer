@@ -133,9 +133,12 @@ export default function PlayerToken({
               {
                 width: size,
                 height: size,
-                borderRadius: size / 2,
+                borderRadius:
+                  theme.tokenShape === "round"
+                    ? size / 2
+                    : Math.round(size * 0.2),
               },
-              { backgroundColor: color },
+              { backgroundColor: theme.fieldTokenColor },
             ]}
           >
             {/* fair-share ring — reddens as the player approaches the average */}
@@ -149,7 +152,10 @@ export default function PlayerToken({
                     left: 2,
                     right: 2,
                     bottom: 2,
-                    borderRadius: (size - 4) / 2,
+                    borderRadius:
+                      theme.tokenShape === "round"
+                        ? (size - 4) / 2
+                        : Math.round(size * 0.15),
                   },
                 ]}
                 pointerEvents="none"
@@ -171,7 +177,10 @@ export default function PlayerToken({
               style={[
                 styles.sentOffOverlay,
                 {
-                  borderRadius: size / 2,
+                  borderRadius:
+                    theme.tokenShape === "round"
+                      ? size / 2
+                      : Math.round(size * 0.2),
                   top: 2,
                   left: 2,
                   right: 2,

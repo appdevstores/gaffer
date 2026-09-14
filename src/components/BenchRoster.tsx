@@ -3,7 +3,7 @@
 // Tapping a bench card arms the two-tap substitution cursor (activeSelectionID).
 
 import type { MatchPlayer } from "@/core/types";
-import { avatarColor, avatarInitials } from "@/lib/avatars";
+import { avatarInitials } from "@/lib/avatars";
 import { formatClock } from "@/lib/mailto";
 import { useMatchTheme } from "@/state/MatchTheme";
 import { useEffect, useRef, useState } from "react";
@@ -107,7 +107,10 @@ export default function BenchRoster({
           <View
             style={[
               styles.tileAvatar,
-              { backgroundColor: avatarColor(p.avatarSeed) },
+              {
+                backgroundColor: theme.benchTokenColor,
+                borderRadius: theme.tokenShape === "round" ? 17 : 7,
+              },
             ]}
           >
             <Text style={styles.tileAvatarText}>
@@ -172,7 +175,10 @@ export default function BenchRoster({
         <View
           style={[
             styles.avatar,
-            { backgroundColor: avatarColor(p.avatarSeed) },
+            {
+              backgroundColor: theme.benchTokenColor,
+              borderRadius: theme.tokenShape === "round" ? 17 : 7,
+            },
           ]}
         >
           <Text style={styles.avatarText}>{avatarInitials(p.playerName)}</Text>

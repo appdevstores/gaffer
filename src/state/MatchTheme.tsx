@@ -15,6 +15,9 @@ export interface MatchTheme {
   pitchBorder: string;
   pitchBackground: string;
   tokenRing: string;
+  fieldTokenColor: string;
+  benchTokenColor: string;
+  tokenShape: "round" | "square";
   benchSurface: string;
 }
 
@@ -32,6 +35,9 @@ export const MATCH_THEMES: Record<MatchThemeName, MatchTheme> = {
     pitchBorder: "#14532d",
     pitchBackground: "#052e16",
     tokenRing: "#facc15",
+    fieldTokenColor: "#2563eb",
+    benchTokenColor: "#16a34a",
+    tokenShape: "round",
     benchSurface: "rgba(15,23,42,0.92)",
   },
   playful: {
@@ -47,6 +53,9 @@ export const MATCH_THEMES: Record<MatchThemeName, MatchTheme> = {
     pitchBorder: "#a3e635",
     pitchBackground: "#14532d",
     tokenRing: "#fef08a",
+    fieldTokenColor: "#2563eb",
+    benchTokenColor: "#16a34a",
+    tokenShape: "square",
     benchSurface: "rgba(49,46,129,0.94)",
   },
 };
@@ -56,20 +65,32 @@ const MatchThemeContext = createContext<{
   toggleTheme: () => void;
 } | null>(null);
 
-export function MatchThemeProvider({ children }: { children: React.ReactNode }) {
+export function MatchThemeProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [name, setName] = useState<MatchThemeName>("professional");
   const value = useMemo(
     () => ({
       theme: MATCH_THEMES[name],
-      toggleTheme: () => setName((current) => (current === "professional" ? "playful" : "professional")),
+      toggleTheme: () =>
+        setName((current) =>
+          current === "professional" ? "playful" : "professional",
+        ),
     }),
     [name],
   );
-  return <MatchThemeContext.Provider value={value}>{children}</MatchThemeContext.Provider>;
+  return (
+    <MatchThemeContext.Provider value={value}>
+      {children}
+    </MatchThemeContext.Provider>
+  );
 }
 
 export function useMatchTheme() {
   const context = useContext(MatchThemeContext);
-  if (!context) throw new Error("useMatchTheme must be used inside MatchThemeProvider");
+  if (!context)
+    throw new Error("useMatchTheme must be used inside MatchThemeProvider");
   return context;
 }
