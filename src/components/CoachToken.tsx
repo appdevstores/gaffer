@@ -5,15 +5,16 @@
 // Avatars are drawn locally (offline-first): a neutral unisex face, with the
 // head coach wearing a bigger hat and the assistant a smaller cap.
 
+import { useMatchTheme } from "@/state/MatchTheme";
 import { useRef } from "react";
 import {
-    Animated,
-    PanResponder,
-    StyleSheet,
-    Text,
-    View,
-    type StyleProp,
-    type ViewStyle,
+  Animated,
+  PanResponder,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
 import Svg, { Circle, Rect } from "react-native-svg";
 
@@ -74,6 +75,7 @@ export default function CoachToken({
   onChangeBaseY,
   paceStyle,
 }: Props) {
+  const { theme } = useMatchTheme();
   const pan = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -96,7 +98,13 @@ export default function CoachToken({
     >
       <Animated.View style={[styles.inner, paceStyle]}>
         {shout && (
-          <View style={styles.bubble} pointerEvents="none">
+          <View
+            style={[
+              styles.bubble,
+              theme.name === "anime" && styles.animeBubble,
+            ]}
+            pointerEvents="none"
+          >
             <Text style={styles.bubbleText}>{shout}</Text>
             <View style={styles.bubbleTail} />
           </View>
@@ -164,6 +172,12 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },
     elevation: 4,
+  },
+  animeBubble: {
+    backgroundColor: "#fef08a",
+    borderWidth: 2,
+    borderColor: "#ec4899",
+    transform: [{ rotate: "-4deg" }],
   },
   bubbleText: {
     color: "#0f172a",

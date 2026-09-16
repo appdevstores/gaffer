@@ -147,9 +147,14 @@ function MatchShell() {
         onPress={() => router.push(`/season/${seasonId}`)}
         color={theme.name === "anime" ? "#c4b5fd" : "#60a5fa"}
       />
-      <Text style={styles.topBarTitle} numberOfLines={1}>
-        {match.teamName} vs {match.opponentName}
-      </Text>
+      <View style={styles.topBarTitleWrap}>
+        {theme.name === "anime" && (
+          <Text style={styles.animeHeaderTag}>⚡ ANIME MATCHDAY</Text>
+        )}
+        <Text style={styles.topBarTitle} numberOfLines={1}>
+          {match.teamName} vs {match.opponentName}
+        </Text>
+      </View>
       <Pressable
         style={[styles.themeToggle, { backgroundColor: theme.surfaceAlt }]}
         onPress={toggleTheme}
@@ -383,6 +388,18 @@ const styles = StyleSheet.create({
     color: "#60a5fa",
     fontSize: 13,
     fontWeight: "700",
+  },
+  topBarTitleWrap: {
+    flex: 1,
+    alignItems: "center",
+    marginHorizontal: 8,
+  },
+  animeHeaderTag: {
+    color: "#fef08a",
+    fontSize: 8,
+    fontWeight: "900",
+    letterSpacing: 1.2,
+    marginBottom: 1,
   },
   topBarTitle: {
     color: "#f1f5f9",

@@ -6,13 +6,13 @@ import type { MatchPlayer } from "@/core/types";
 import { avatarColor, avatarInitials } from "@/lib/avatars";
 import { useMatchTheme } from "@/state/MatchTheme";
 import {
-  Animated,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type StyleProp,
-  type ViewStyle,
+    Animated,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+    type StyleProp,
+    type ViewStyle,
 } from "react-native";
 
 export const TOKEN_SIZE = 42;
@@ -157,7 +157,14 @@ export default function PlayerToken({
                     ? size / 2
                     : Math.round(size * 0.2),
               },
-              { backgroundColor: theme.fieldTokenColor },
+              {
+                backgroundColor: theme.fieldTokenColor,
+                borderColor: theme.name === "anime" ? "#67e8f9" : "#fff",
+                borderWidth: theme.name === "anime" ? 3 : 2,
+                shadowColor: theme.name === "anime" ? "#ec4899" : "#000",
+                shadowOpacity: theme.name === "anime" ? 0.85 : 0.35,
+                shadowRadius: theme.name === "anime" ? 7 : 3,
+              },
             ]}
           >
             {/* fair-share ring — reddens as the player approaches the average */}

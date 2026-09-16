@@ -598,6 +598,17 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
           ))}
         </Svg>
 
+        {theme.name === "anime" && (
+          <View style={styles.animeOverlay} pointerEvents="none">
+            <View style={styles.animeTag}>
+              <Text style={styles.animeTagText}>⚡ ANIME MATCHDAY</Text>
+            </View>
+            <View style={styles.speedLineOne} />
+            <View style={styles.speedLineTwo} />
+            <View style={styles.speedLineThree} />
+          </View>
+        )}
+
         {drawingMode && (
           <View style={styles.drawOverlay} {...drawResponder.panHandlers} />
         )}
@@ -866,6 +877,57 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },
     elevation: 4,
+  },
+  animeOverlay: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    right: 10,
+    bottom: 10,
+    zIndex: 2,
+  },
+  animeTag: {
+    alignSelf: "flex-start",
+    backgroundColor: "#ec4899",
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: "#fef08a",
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    transform: [{ skewX: "-8deg" }],
+  },
+  animeTagText: {
+    color: "#fff",
+    fontSize: 8,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+  speedLineOne: {
+    position: "absolute",
+    top: 42,
+    left: 18,
+    width: "20%",
+    height: 2,
+    backgroundColor: "rgba(34,211,238,0.75)",
+    transform: [{ rotate: "-8deg" }],
+  },
+  speedLineTwo: {
+    position: "absolute",
+    top: 49,
+    left: 5,
+    width: "12%",
+    height: 1,
+    backgroundColor: "rgba(236,72,153,0.8)",
+    transform: [{ rotate: "-8deg" }],
+  },
+  speedLineThree: {
+    position: "absolute",
+    bottom: 35,
+    right: 15,
+    width: "17%",
+    height: 2,
+    backgroundColor: "rgba(163,230,53,0.75)",
+    transform: [{ rotate: "8deg" }],
   },
   drawOverlay: {
     position: "absolute",
