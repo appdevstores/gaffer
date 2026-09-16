@@ -4,6 +4,7 @@
 // horizontal split-frame, pitch at 70% width with the control sidebar docked
 // permanently on the right 30% panel.
 
+import BackButton from "@/components/BackButton";
 import BenchRoster from "@/components/BenchRoster";
 import CardDialog from "@/components/CardDialog";
 import FormationPicker from "@/components/FormationPicker";
@@ -141,9 +142,11 @@ function MatchShell() {
         { backgroundColor: theme.root },
       ]}
     >
-      <Pressable onPress={() => router.push(`/season/${seasonId}`)} hitSlop={8}>
-        <Text style={styles.backText}>‹ Dashboard</Text>
-      </Pressable>
+      <BackButton
+        label="Dashboard"
+        onPress={() => router.push(`/season/${seasonId}`)}
+        color={theme.name === "playful" ? "#c4b5fd" : "#60a5fa"}
+      />
       <Text style={styles.topBarTitle} numberOfLines={1}>
         {match.teamName} vs {match.opponentName}
       </Text>

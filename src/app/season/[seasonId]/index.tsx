@@ -1,15 +1,16 @@
 // Season dashboard: roster with season-cumulative stats, match history,
 // live-match resume, and entry points to setup / storage management.
 
+import BackButton from "@/components/BackButton";
 import { getMetaValue, setMetaValue } from "@/core/db";
 import {
-  deletePlayer,
-  findLiveMatch,
-  getSeason,
-  listMatches,
-  listPlayers,
-  purgeSeason,
-  stopSeason,
+    deletePlayer,
+    findLiveMatch,
+    getSeason,
+    listMatches,
+    listPlayers,
+    purgeSeason,
+    stopSeason,
 } from "@/core/repo";
 import type { MatchSession, Player, Season } from "@/core/types";
 import { avatarColor, avatarInitials } from "@/lib/avatars";
@@ -17,12 +18,12 @@ import { formatClock, STAGE_LABELS } from "@/lib/mailto";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    Alert,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -103,9 +104,7 @@ export default function SeasonDashboard() {
       ]}
     >
       <View style={styles.header}>
-        <Pressable onPress={() => router.push("/")} hitSlop={8}>
-          <Text style={styles.back}>‹ Seasons</Text>
-        </Pressable>
+        <BackButton label="Seasons" onPress={() => router.push("/")} />
         <View style={styles.headerCenter}>
           <Text style={styles.seasonName}>{season?.name ?? "…"}</Text>
           {season?.isActive ? (

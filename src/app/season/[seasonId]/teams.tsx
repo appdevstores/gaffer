@@ -1,3 +1,4 @@
+import BackButton from "@/components/BackButton";
 import {
   addPlayer,
   createTeam,
@@ -109,9 +110,7 @@ export default function TeamsScreen() {
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
-          <Text style={styles.back}>‹ Season</Text>
-        </Pressable>
+        <BackButton label="Season" onPress={() => router.back()} />
         <Text style={styles.title}>Teams</Text>
         <View style={{ width: 60 }} />
       </View>
