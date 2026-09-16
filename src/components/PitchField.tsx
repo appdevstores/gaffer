@@ -29,7 +29,15 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import Svg, { Ellipse, Line, Path, Rect } from "react-native-svg";
+import Svg, {
+  Defs,
+  Ellipse,
+  Line,
+  LinearGradient,
+  Path,
+  Rect,
+  Stop,
+} from "react-native-svg";
 import CoachToken from "./CoachToken";
 import PlayerToken, { TOKEN_SIZE } from "./PlayerToken";
 import SoccerBall from "./SoccerBall";
@@ -478,15 +486,60 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
           viewBox={`0 0 ${PITCH.w} ${PITCH.h}`}
           preserveAspectRatio="none"
         >
-          <Rect x={0} y={0} width={PITCH.w} height={PITCH.h} fill="#15803d" />
-          {/* mowing stripes */}
+          <Defs>
+            <LinearGradient id="grassGradient" x1="0" y1="0" x2="1" y2="0">
+              <Stop
+                offset="0%"
+                stopColor={theme.name === "anime" ? "#0f5132" : "#166534"}
+              />
+              <Stop
+                offset="48%"
+                stopColor={theme.name === "anime" ? "#16803d" : "#15803d"}
+              />
+              <Stop
+                offset="100%"
+                stopColor={theme.name === "anime" ? "#0f5132" : "#166534"}
+              />
+            </LinearGradient>
+          </Defs>
           <Rect
             x={0}
             y={0}
-            width={PITCH.w / 2}
+            width={PITCH.w}
             height={PITCH.h}
-            fill="rgba(255,255,255,0.05)"
+            fill="url(#grassGradient)"
           />
+          {/* alternating mowing stripes */}
+          {Array.from({ length: 8 }, (_, index) => (
+            <Rect
+              key={`mow-${index}`}
+              x={index * (PITCH.w / 8)}
+              y={0}
+              width={PITCH.w / 8}
+              height={PITCH.h}
+              fill={
+                index % 2 === 0
+                  ? "rgba(255,255,255,0.045)"
+                  : "rgba(0,40,20,0.035)"
+              }
+            />
+          ))}
+          {/* subtle grass-blade texture */}
+          {Array.from({ length: 28 }, (_, index) => {
+            const x = 2 + ((index * 19) % 72);
+            const y = 4 + ((index * 31) % 84);
+            return (
+              <Line
+                key={`grass-${index}`}
+                x1={x}
+                y1={y}
+                x2={x + (index % 2 === 0 ? 0.7 : -0.7)}
+                y2={y - 1.7}
+                stroke="rgba(220,252,231,0.14)"
+                strokeWidth={0.22}
+              />
+            );
+          })}
           {/* halfway line + center circle + spot */}
           <Line
             x1={PITCH.w / 2}
