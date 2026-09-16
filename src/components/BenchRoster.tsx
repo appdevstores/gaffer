@@ -28,6 +28,8 @@ interface Props {
   fairShareSeconds: number;
   /** Long-press a bench player to open the disciplinary card dialog. */
   onCardPress?: (p: MatchPlayer) => void;
+  /** Remove a non-field player from this match-day roster only. */
+  onRemove?: (p: MatchPlayer) => void;
   horizontal?: boolean;
   compact?: boolean;
 }
@@ -40,6 +42,7 @@ export default function BenchRoster({
   nowSeconds,
   fairShareSeconds,
   onCardPress,
+  onRemove,
   horizontal,
   compact,
 }: Props) {
@@ -103,6 +106,14 @@ export default function BenchRoster({
               style={[styles.selectedBorder, { opacity: pulse }]}
               pointerEvents="none"
             />
+          )}
+          {onRemove && !p.sentOff && (
+            <Pressable
+              style={styles.removeMatchPlayer}
+              onPress={() => onRemove(p)}
+            >
+              <Text style={styles.removeMatchPlayerText}>×</Text>
+            </Pressable>
           )}
           <View
             style={[
@@ -171,6 +182,14 @@ export default function BenchRoster({
             style={[styles.selectedBorder, { opacity: pulse }]}
             pointerEvents="none"
           />
+        )}
+        {onRemove && !p.sentOff && (
+          <Pressable
+            style={styles.removeMatchPlayer}
+            onPress={() => onRemove(p)}
+          >
+            <Text style={styles.removeMatchPlayerText}>×</Text>
+          </Pressable>
         )}
         <View
           style={[
@@ -442,6 +461,24 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 1,
     fontVariant: ["tabular-nums"],
+  },
+  removeMatchPlayer: {
+    position: "absolute",
+    top: 3,
+    right: 3,
+    zIndex: 5,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(15,23,42,0.75)",
+  },
+  removeMatchPlayerText: {
+    color: "#94a3b8",
+    fontSize: 15,
+    lineHeight: 16,
+    fontWeight: "800",
   },
   tileSentOff: {
     opacity: 0.72,

@@ -10,6 +10,7 @@ import FormationPicker from "@/components/FormationPicker";
 import MatchSummary from "@/components/MatchSummary";
 import PitchField from "@/components/PitchField";
 import Scoreboard from "@/components/Scoreboard";
+import type { MatchPlayer } from "@/core/types";
 import { getFormation } from "@/lib/formations";
 import { MatchProvider, useMatch } from "@/state/MatchProvider";
 import { MatchThemeProvider, useMatchTheme } from "@/state/MatchTheme";
@@ -39,6 +40,7 @@ function MatchShell() {
     selectionId,
     selectPlayer,
     addLateArrival,
+    removeBenchPlayer,
     applyFormation,
     fairShareSeconds,
     showRotationBadges,
@@ -46,6 +48,7 @@ function MatchShell() {
   } = useMatch();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cardTargetId, setCardTargetId] = useState<string | null>(null);
+  const [removeTargetId, setRemoveTargetId] = useState<string | null>(null);
   if (!match) return null;
 
   const cardTarget =
@@ -53,6 +56,9 @@ function MatchShell() {
       ? (players.find((p) => p.playerId === cardTargetId) ?? null)
       : null;
   const openCardDialog = (playerId: string) => setCardTargetId(playerId);
+  const removeTarget = removeTargetId
+    ? (players.find((player) => player.playerId === removeTargetId) ?? null)
+    : null;
 
   const changeFormation = (id: string) =>
     applyFormation(getFormation(match.gameFormat, id));
@@ -182,6 +188,7 @@ function MatchShell() {
                   nowSeconds={match.elapsedSeconds}
                   fairShareSeconds={fairShareSeconds}
                   onCardPress={(p) => openCardDialog(p.playerId)}
+                  onRemove={(p) => setRemoveTargetId(p.playerId)}
                 />
               </View>
             </ScrollView>
@@ -189,6 +196,14 @@ function MatchShell() {
         </View>
         {settingsModal}
         <CardDialog player={cardTarget} onClose={() => setCardTargetId(null)} />
+        <RemoveMatchPlayerDialog
+          player={removeTarget}
+          onCancel={() => setRemoveTargetId(null)}
+          onConfirm={() => {
+            if (removeTarget) removeBenchPlayer(removeTarget.playerId);
+            setRemoveTargetId(null);
+          }}
+        />
       </View>
     );
   }
@@ -219,6 +234,43 @@ function MatchShell() {
       {settingsModal}
       <CardDialog player={cardTarget} onClose={() => setCardTargetId(null)} />
     </View>
+  );
+}
+
+function RemoveMatchPlayerDialog({
+  player,
+  onCancel,
+  onConfirm,
+}: {
+  player: MatchPlayer | null;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <Modal
+      visible={player !== null}
+      transparent
+      animationType="fade"
+      onRequestClose={onCancel}
+    >
+      <View style={styles.modalBackdrop}>
+        <View style={styles.settingsModalCard}>
+          <Text style={styles.settingsTitle}>Remove from match?</Text>
+          <Text style={styles.settingsSubtitle}>
+            {player?.playerName} will leave this match-day bench, but remain on
+            the team roster for future matches.
+          </Text>
+          <View style={styles.removeActions}>
+            <Pressable style={styles.modalCancel} onPress={onCancel}>
+              <Text style={styles.modalCancelText}>Cancel</Text>
+            </Pressable>
+            <Pressable style={styles.removeConfirm} onPress={onConfirm}>
+              <Text style={styles.removeConfirmText}>Remove Player</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -392,6 +444,32 @@ const styles = StyleSheet.create({
   switchThumbOn: {
     alignSelf: "flex-end",
     backgroundColor: "#fff",
+  },
+  removeActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 16,
+  },
+  removeConfirm: {
+    backgroundColor: "#991b1b",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  removeConfirmText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "900",
+  },
+  modalCancel: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  modalCancelText: {
+    color: "#94a3b8",
+    fontSize: 13,
+    fontWeight: "700",
   },
   phoneScoreboard: {
     paddingHorizontal: 10,

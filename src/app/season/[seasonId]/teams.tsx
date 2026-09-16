@@ -3,6 +3,7 @@ import {
   createTeam,
   listPlayers,
   listTeams,
+  updatePlayerName,
   updateTeam,
 } from "@/core/repo";
 import type { GameFormat, Player, Team } from "@/core/types";
@@ -10,6 +11,7 @@ import { GAME_FORMATS } from "@/lib/formations";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -29,6 +31,8 @@ export default function TeamsScreen() {
   const [gameFormat, setGameFormat] = useState<GameFormat>("7v7");
   const [playerName, setPlayerName] = useState("");
   const [jersey, setJersey] = useState("");
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const [editingName, setEditingName] = useState("");
 
   const refresh = useCallback(async () => {
     if (!seasonId) return;
@@ -80,6 +84,13 @@ export default function TeamsScreen() {
       defaultGameFormat: gameFormat,
     });
     refresh();
+  };
+
+  const savePlayerName = async () => {
+    if (!seasonId || !editingPlayer || !editingName.trim()) return;
+    await updatePlayerName(seasonId, editingPlayer.id, editingName);
+    setEditingPlayer(null);
+    if (selected) setPlayers(await listPlayers(seasonId, selected.id));
   };
 
   const addRosterPlayer = async () => {
@@ -221,10 +232,17 @@ export default function TeamsScreen() {
             </Pressable>
           </View>
           {players.map((p) => (
-            <View key={p.id} style={styles.player}>
+            <Pressable
+              key={p.id}
+              style={styles.player}
+              onPress={() => {
+                setEditingPlayer(p);
+                setEditingName(p.name);
+              }}
+            >
               <Text style={styles.playerName}>{p.name}</Text>
-              <Text style={styles.playerMeta}>#{p.jerseyNumber}</Text>
-            </View>
+              <Text style={styles.playerMeta}>#{p.jerseyNumber} · Edit</Text>
+            </Pressable>
           ))}
         </View>
       )}
@@ -235,6 +253,38 @@ export default function TeamsScreen() {
       >
         <Text style={styles.primaryText}>Set Up New Match →</Text>
       </Pressable>
+
+      <Modal
+        visible={editingPlayer !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEditingPlayer(null)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Edit player name</Text>
+            <TextInput
+              style={styles.input}
+              value={editingName}
+              onChangeText={setEditingName}
+              autoFocus
+              onSubmitEditing={savePlayerName}
+              returnKeyType="done"
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.modalCancel}
+                onPress={() => setEditingPlayer(null)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.primary} onPress={savePlayerName}>
+                <Text style={styles.primaryText}>Save Name</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -334,4 +384,31 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 14,
   },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(2,6,23,0.72)",
+    justifyContent: "center",
+    padding: 20,
+  },
+  modalCard: {
+    backgroundColor: "#0f172a",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#334155",
+    padding: 18,
+  },
+  modalTitle: {
+    color: "#f8fafc",
+    fontSize: 17,
+    fontWeight: "900",
+    marginBottom: 12,
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 10,
+  },
+  modalCancel: { paddingHorizontal: 12, paddingVertical: 10 },
+  modalCancelText: { color: "#94a3b8", fontWeight: "700" },
 });

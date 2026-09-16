@@ -7,6 +7,7 @@ import {
   addLatePlayerToMatch,
   addMatchEvent,
   addPlayer,
+  deleteMatchPlayer,
   flushPlayerCumulatives,
   getMatch,
   getMatchPlayers,
@@ -95,6 +96,7 @@ interface MatchContextValue {
   flipField(): void;
   applyFormation(formation: Formation): void;
   addLateArrival(name: string, jerseyNumber: number): Promise<Player>;
+  removeBenchPlayer(playerId: string): void;
   showNotice(msg: string): void;
 }
 
@@ -642,6 +644,25 @@ export function MatchProvider({ matchId, children }: Props) {
     [],
   );
 
+  const removeBenchPlayer = useCallback(
+    (playerId: string) => {
+      const m = matchRef.current;
+      const player = playersRef.current.find(
+        (item) => item.playerId === playerId,
+      );
+      if (!m || !player) return;
+      if (player.status !== "bench") {
+        showNotice(
+          "Substitute the player off before removing them from this match",
+        );
+        return;
+      }
+      deleteMatchPlayer(m.id, playerId).catch(() => {});
+      setPlayers((prev) => prev.filter((item) => item.playerId !== playerId));
+    },
+    [showNotice],
+  );
+
   // ---- Derived ----
   const fieldPlayers = useMemo(
     () => players.filter((p) => p.status === "field"),
@@ -720,6 +741,7 @@ export function MatchProvider({ matchId, children }: Props) {
       flipField,
       applyFormation,
       addLateArrival,
+      removeBenchPlayer,
       showNotice,
     }),
     [
@@ -747,6 +769,7 @@ export function MatchProvider({ matchId, children }: Props) {
       flipField,
       applyFormation,
       addLateArrival,
+      removeBenchPlayer,
       showNotice,
     ],
   );

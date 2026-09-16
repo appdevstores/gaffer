@@ -4,15 +4,15 @@
 import { getDb } from "./db";
 import { uuid } from "./id";
 import type {
-    GameFormat,
-    MatchEvent,
-    MatchEventType,
-    MatchPlayer,
-    MatchSession,
-    MatchStage,
-    Player,
-    Season,
-    Team,
+  GameFormat,
+  MatchEvent,
+  MatchEventType,
+  MatchPlayer,
+  MatchSession,
+  MatchStage,
+  Player,
+  Season,
+  Team,
 } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -280,6 +280,20 @@ export async function addPlayer(
     player.createdAt,
   );
   return player;
+}
+
+export async function updatePlayerName(
+  seasonId: string,
+  playerId: string,
+  name: string,
+): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    "UPDATE players SET name = ? WHERE id = ? AND season_id = ?",
+    name.trim(),
+    playerId,
+    seasonId,
+  );
 }
 
 export async function deletePlayer(
@@ -639,6 +653,18 @@ export async function addLatePlayerToMatch(
     player.id,
     benchStartSeconds,
     rosterOrder,
+  );
+}
+
+export async function deleteMatchPlayer(
+  matchId: string,
+  playerId: string,
+): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    "DELETE FROM match_players WHERE match_id = ? AND player_id = ? AND status = 'bench'",
+    matchId,
+    playerId,
   );
 }
 
