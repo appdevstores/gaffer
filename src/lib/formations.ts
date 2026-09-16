@@ -261,6 +261,186 @@ export const FORMATIONS: Record<SupportedFormationFormat, Formation[]> = {
   ],
 };
 
+/** Additional coach-requested line maps. Kept separate so new presets do not
+ * disturb the IDs or coordinates of existing saved matches. */
+const EXTRA_FORMATIONS: Partial<Record<GameFormat, Formation[]>> = {
+  "4v4": [
+    {
+      id: "0-4-0",
+      label: "Four Across",
+      shape: "0-4-0",
+      slots: [
+        { xPct: 44, yPct: 14 },
+        { xPct: 44, yPct: 38 },
+        { xPct: 44, yPct: 62 },
+        { xPct: 44, yPct: 86 },
+      ],
+    },
+    {
+      id: "1-1-2",
+      label: "Attacking",
+      shape: "1-1-2",
+      slots: [
+        { xPct: 16, yPct: 50 },
+        { xPct: 45, yPct: 50 },
+        { xPct: 78, yPct: 32 },
+        { xPct: 78, yPct: 68 },
+      ],
+    },
+  ],
+  "7v7": [
+    {
+      id: "3-3-1",
+      label: "Balanced",
+      shape: "3-3-1",
+      slots: [
+        { xPct: 10, yPct: 25 },
+        { xPct: 10, yPct: 50 },
+        { xPct: 10, yPct: 75 },
+        { xPct: 48, yPct: 25 },
+        { xPct: 48, yPct: 50 },
+        { xPct: 48, yPct: 75 },
+        { xPct: 82, yPct: 50 },
+      ],
+    },
+    {
+      id: "1-3-3",
+      label: "Attacking Line",
+      shape: "1-3-3",
+      slots: [
+        { xPct: 10, yPct: 50 },
+        { xPct: 43, yPct: 22 },
+        { xPct: 43, yPct: 50 },
+        { xPct: 43, yPct: 78 },
+        { xPct: 78, yPct: 18 },
+        { xPct: 78, yPct: 50 },
+        { xPct: 78, yPct: 82 },
+      ],
+    },
+    {
+      id: "2-4-1",
+      label: "Midfield Box",
+      shape: "2-4-1",
+      slots: [
+        { xPct: 12, yPct: 35 },
+        { xPct: 12, yPct: 65 },
+        { xPct: 47, yPct: 14 },
+        { xPct: 47, yPct: 38 },
+        { xPct: 47, yPct: 62 },
+        { xPct: 47, yPct: 86 },
+        { xPct: 82, yPct: 50 },
+      ],
+    },
+  ],
+  "8v8": [
+    {
+      id: "3-4-1",
+      label: "Eight-a-side Attack",
+      shape: "3-4-1",
+      slots: [
+        { xPct: 10, yPct: 20 },
+        { xPct: 10, yPct: 50 },
+        { xPct: 10, yPct: 80 },
+        { xPct: 45, yPct: 12 },
+        { xPct: 45, yPct: 38 },
+        { xPct: 45, yPct: 62 },
+        { xPct: 45, yPct: 88 },
+        { xPct: 82, yPct: 50 },
+      ],
+    },
+  ],
+  "9v9": [
+    {
+      id: "4-2-2",
+      label: "Compact Attack",
+      shape: "4-2-2",
+      slots: [
+        { xPct: 8, yPct: 18 },
+        { xPct: 8, yPct: 40 },
+        { xPct: 8, yPct: 60 },
+        { xPct: 8, yPct: 82 },
+        { xPct: 43, yPct: 34 },
+        { xPct: 43, yPct: 66 },
+        { xPct: 74, yPct: 35 },
+        { xPct: 74, yPct: 65 },
+        { xPct: 90, yPct: 50 },
+      ],
+    },
+    {
+      id: "4-4-1",
+      label: "Four Midfield",
+      shape: "4-4-1",
+      slots: [
+        { xPct: 8, yPct: 18 },
+        { xPct: 8, yPct: 40 },
+        { xPct: 8, yPct: 60 },
+        { xPct: 8, yPct: 82 },
+        { xPct: 45, yPct: 14 },
+        { xPct: 45, yPct: 38 },
+        { xPct: 45, yPct: 62 },
+        { xPct: 45, yPct: 86 },
+        { xPct: 80, yPct: 50 },
+      ],
+    },
+  ],
+  "11v11": [
+    {
+      id: "4-2-3-1",
+      label: "4-2-3-1",
+      shape: "4-2-3-1",
+      slots: [
+        { xPct: 6, yPct: 14 },
+        { xPct: 6, yPct: 38 },
+        { xPct: 6, yPct: 62 },
+        { xPct: 6, yPct: 86 },
+        { xPct: 34, yPct: 35 },
+        { xPct: 34, yPct: 65 },
+        { xPct: 58, yPct: 20 },
+        { xPct: 58, yPct: 50 },
+        { xPct: 58, yPct: 80 },
+        { xPct: 82, yPct: 50 },
+        { xPct: 94, yPct: 50 },
+      ],
+    },
+    {
+      id: "3-4-3",
+      label: "3-4-3",
+      shape: "3-4-3",
+      slots: [
+        { xPct: 8, yPct: 25 },
+        { xPct: 8, yPct: 50 },
+        { xPct: 8, yPct: 75 },
+        { xPct: 38, yPct: 12 },
+        { xPct: 38, yPct: 38 },
+        { xPct: 38, yPct: 62 },
+        { xPct: 38, yPct: 88 },
+        { xPct: 75, yPct: 18 },
+        { xPct: 75, yPct: 50 },
+        { xPct: 75, yPct: 82 },
+        { xPct: 94, yPct: 50 },
+      ],
+    },
+    {
+      id: "5-4-1",
+      label: "Defensive Block",
+      shape: "5-4-1",
+      slots: [
+        { xPct: 6, yPct: 10 },
+        { xPct: 6, yPct: 30 },
+        { xPct: 6, yPct: 50 },
+        { xPct: 6, yPct: 70 },
+        { xPct: 6, yPct: 90 },
+        { xPct: 38, yPct: 14 },
+        { xPct: 38, yPct: 38 },
+        { xPct: 38, yPct: 62 },
+        { xPct: 38, yPct: 86 },
+        { xPct: 72, yPct: 50 },
+        { xPct: 94, yPct: 50 },
+      ],
+    },
+  ],
+};
+
 export const GAME_FORMATS: GameFormat[] = [
   "4v4",
   "5v5",
@@ -281,13 +461,16 @@ function formationFormat(format: GameFormat): "4v4" | "7v7" | "9v9" | "11v11" {
 }
 
 export function getFormation(format: GameFormat, id: string): Formation {
-  const options = FORMATIONS[formationFormat(format)];
+  const options = getFormationsForFormat(format);
   const found = options.find((f) => f.id === id);
   return found ?? options[0];
 }
 
 export function getFormationsForFormat(format: GameFormat): Formation[] {
-  return FORMATIONS[formationFormat(format)];
+  return [
+    ...FORMATIONS[formationFormat(format)],
+    ...(EXTRA_FORMATIONS[format] ?? []),
+  ];
 }
 
 /**
