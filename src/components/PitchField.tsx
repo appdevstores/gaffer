@@ -388,7 +388,6 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
   }, [isRunning]);
   const shout = isRunning ? SHOUT_WORDS[shoutIndex] : null;
 
-  const flipped = match?.fieldOrientation === "FLIPPED";
   const { rx, ry } = pitchLines(pitchSize.w || 1, pitchSize.h || 1);
 
   const handleGroundTap = (e: any) => {
@@ -428,23 +427,10 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
           backgroundColor: theme.pitchBackground,
           borderColor: theme.pitchBorder,
         },
-        !compact && styles.wrapperTablet,
+        compact ? styles.wrapperPhone : styles.wrapperTablet,
       ]}
     >
-      {/* Technical Area strip — §4 Rule C: pinned outside the field lines */}
-      {flipped && (
-        <TechnicalStrip
-          compact={compact}
-          height={stripHeight}
-          onLayout={setStripHeight}
-          coachY={coachY}
-          onCoachY={setCoachY}
-          paceStyle={paceStyle}
-          shout={shout}
-          horizontal={!compact}
-        />
-      )}
-
+      {/* Pitch stays above the technical area; the technical strip is always at the bottom. */}
       <View
         style={styles.pitch}
         onLayout={(e) =>
@@ -753,18 +739,16 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
         ))}
       </View>
 
-      {!flipped && (
-        <TechnicalStrip
-          compact={compact}
-          height={stripHeight}
-          onLayout={setStripHeight}
-          coachY={coachY}
-          onCoachY={setCoachY}
-          paceStyle={paceStyle}
-          shout={shout}
-          horizontal={!compact}
-        />
-      )}
+      <TechnicalStrip
+        compact={compact}
+        height={stripHeight}
+        onLayout={setStripHeight}
+        coachY={coachY}
+        onCoachY={setCoachY}
+        paceStyle={paceStyle}
+        shout={shout}
+        horizontal
+      />
     </View>
   );
 }
@@ -840,6 +824,9 @@ const styles = StyleSheet.create({
     borderColor: "#14532d",
   },
   wrapperTablet: {
+    flexDirection: "column",
+  },
+  wrapperPhone: {
     flexDirection: "column",
   },
   pitch: {
