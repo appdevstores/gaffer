@@ -293,7 +293,9 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
         ? {
             translateX: paceValues[key].interpolate({
               inputRange: [0, 1],
-              outputRange: [0, pitchSize.w * 0.18],
+              // Horizontal strip movement stays inside the coach track; using
+              // full pitch width would make coaches overrun the half-width area.
+              outputRange: [0, stripHeight * 0.35],
             }),
           }
         : {
@@ -813,6 +815,12 @@ function TechnicalStrip({
         paceStyle={paceStyle("assistant", horizontal)}
         horizontal={horizontal}
       />
+      {horizontal && (
+        <View style={styles.coolerBox} pointerEvents="none">
+          <Text style={styles.coolerIcon}>🧃</Text>
+          <Text style={styles.coolerLabel}>CAPRI</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -928,6 +936,32 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingTop: 0,
     paddingHorizontal: 12,
+  },
+  coolerBox: {
+    width: 42,
+    height: 36,
+    borderRadius: 6,
+    backgroundColor: "#f97316",
+    borderWidth: 1.5,
+    borderColor: "#fed7aa",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  coolerIcon: {
+    fontSize: 13,
+    lineHeight: 14,
+  },
+  coolerLabel: {
+    color: "#fff",
+    fontSize: 6,
+    fontWeight: "900",
+    letterSpacing: 0.4,
   },
   techLabel: {
     color: "#94a3b8",
