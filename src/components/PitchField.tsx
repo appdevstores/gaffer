@@ -287,14 +287,21 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
     };
   }, [isRunning, stripHeight, paceLoops, paceValues]);
 
-  const paceStyle = (key: "head" | "assistant") => ({
+  const paceStyle = (key: "head" | "assistant", horizontal = false): any => ({
     transform: [
-      {
-        translateY: paceValues[key].interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, stripHeight * 0.16],
-        }),
-      },
+      horizontal
+        ? {
+            translateX: paceValues[key].interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, pitchSize.w * 0.18],
+            }),
+          }
+        : {
+            translateY: paceValues[key].interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, stripHeight * 0.16],
+            }),
+          },
     ],
   });
 
@@ -768,9 +775,7 @@ function TechnicalStrip({
   onLayout: (h: number) => void;
   coachY: { head: number; assistant: number };
   onCoachY: (y: { head: number; assistant: number }) => void;
-  paceStyle: (key: "head" | "assistant") => {
-    transform: { translateY: any }[];
-  };
+  paceStyle: (key: "head" | "assistant", horizontal?: boolean) => any;
   shout: string | null;
   horizontal: boolean;
 }) {
@@ -795,7 +800,7 @@ function TechnicalStrip({
         baseY={coachY.head}
         trackHeight={height}
         onChangeBaseY={(y) => onCoachY({ ...coachY, head: y })}
-        paceStyle={paceStyle("head")}
+        paceStyle={paceStyle("head", horizontal)}
         horizontal={horizontal}
       />
       <CoachToken
@@ -805,7 +810,7 @@ function TechnicalStrip({
         baseY={coachY.assistant}
         trackHeight={height}
         onChangeBaseY={(y) => onCoachY({ ...coachY, assistant: y })}
-        paceStyle={paceStyle("assistant")}
+        paceStyle={paceStyle("assistant", horizontal)}
         horizontal={horizontal}
       />
     </View>
@@ -917,8 +922,9 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   techStripHorizontal: {
-    width: "100%",
+    width: "50%",
     height: 54,
+    alignSelf: "flex-start",
     flexDirection: "row",
     paddingTop: 0,
     paddingHorizontal: 12,
