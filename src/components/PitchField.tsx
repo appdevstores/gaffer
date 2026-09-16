@@ -397,6 +397,29 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
   }, [isRunning]);
   const shout = isRunning ? SHOUT_WORDS[shoutIndex] : null;
 
+  const animePulse = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    animePulse.stopAnimation();
+    if (theme.name === "anime" && isRunning) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(animePulse, {
+            toValue: 0.5,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+          Animated.timing(animePulse, {
+            toValue: 1,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+        ]),
+      ).start();
+    } else {
+      animePulse.setValue(1);
+    }
+  }, [animePulse, isRunning, theme.name]);
+
   const { rx, ry } = pitchLines(pitchSize.w || 1, pitchSize.h || 1);
 
   const handleGroundTap = (e: any) => {
@@ -600,12 +623,18 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
 
         {theme.name === "anime" && (
           <View style={styles.animeOverlay} pointerEvents="none">
-            <View style={styles.animeTag}>
+            <Animated.View style={[styles.animeTag, { opacity: animePulse }]}>
               <Text style={styles.animeTagText}>⚡ ANIME MATCHDAY</Text>
-            </View>
+            </Animated.View>
+            <Text style={styles.animeWatermark}>MATCHDAY</Text>
+            <Text style={styles.animeLive}>LIVE</Text>
             <View style={styles.speedLineOne} />
             <View style={styles.speedLineTwo} />
             <View style={styles.speedLineThree} />
+            <View style={styles.speedLineFour} />
+            <View style={styles.speedLineFive} />
+            <View style={styles.animeCornerTop} />
+            <View style={styles.animeCornerBottom} />
           </View>
         )}
 
@@ -901,6 +930,65 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontWeight: "900",
     letterSpacing: 1,
+  },
+  animeWatermark: {
+    position: "absolute",
+    right: 8,
+    top: 18,
+    color: "rgba(254,240,138,0.13)",
+    fontSize: 30,
+    fontWeight: "900",
+    letterSpacing: 4,
+    transform: [{ rotate: "-8deg" }],
+  },
+  animeLive: {
+    position: "absolute",
+    right: 12,
+    top: 58,
+    color: "#67e8f9",
+    fontSize: 9,
+    fontWeight: "900",
+    letterSpacing: 2,
+    textShadowColor: "#ec4899",
+    textShadowRadius: 6,
+  },
+  speedLineFour: {
+    position: "absolute",
+    top: 74,
+    left: 25,
+    width: "25%",
+    height: 1,
+    backgroundColor: "rgba(254,240,138,0.65)",
+    transform: [{ rotate: "-8deg" }],
+  },
+  speedLineFive: {
+    position: "absolute",
+    bottom: 70,
+    right: 26,
+    width: "22%",
+    height: 1,
+    backgroundColor: "rgba(236,72,153,0.7)",
+    transform: [{ rotate: "8deg" }],
+  },
+  animeCornerTop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 34,
+    height: 34,
+    borderTopWidth: 3,
+    borderLeftWidth: 3,
+    borderColor: "#ec4899",
+  },
+  animeCornerBottom: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 34,
+    height: 34,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+    borderColor: "#a3e635",
   },
   speedLineOne: {
     position: "absolute",
