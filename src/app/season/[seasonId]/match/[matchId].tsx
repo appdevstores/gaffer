@@ -145,7 +145,7 @@ function MatchShell() {
       <BackButton
         label="Dashboard"
         onPress={() => router.push(`/season/${seasonId}`)}
-        color={theme.name === "playful" ? "#c4b5fd" : "#60a5fa"}
+        color={theme.name === "anime" ? "#c4b5fd" : "#60a5fa"}
       />
       <Text style={styles.topBarTitle} numberOfLines={1}>
         {match.teamName} vs {match.opponentName}
@@ -155,7 +155,7 @@ function MatchShell() {
         onPress={toggleTheme}
       >
         <Text style={styles.themeToggleText}>
-          {theme.name === "professional" ? "🎨" : "🧭"}
+          {theme.name === "professional" ? "⚡" : "🧭"}
         </Text>
       </Pressable>
     </View>

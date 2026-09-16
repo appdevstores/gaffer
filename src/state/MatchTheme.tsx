@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 
-export type MatchThemeName = "professional" | "playful";
+export type MatchThemeName = "professional" | "anime";
 
 export interface MatchTheme {
   name: MatchThemeName;
@@ -40,23 +40,23 @@ export const MATCH_THEMES: Record<MatchThemeName, MatchTheme> = {
     tokenShape: "round",
     benchSurface: "rgba(15,23,42,0.92)",
   },
-  playful: {
-    name: "playful",
-    root: "#172554",
-    surface: "#312e81",
-    surfaceAlt: "#4338ca",
-    border: "#818cf8",
+  anime: {
+    name: "anime",
+    root: "#0b1026",
+    surface: "#20134f",
+    surfaceAlt: "#312e81",
+    border: "#a78bfa",
     text: "#fff7ed",
     muted: "#c4b5fd",
-    accent: "#f97316",
-    accentStrong: "#84cc16",
-    pitchBorder: "#a3e635",
-    pitchBackground: "#14532d",
+    accent: "#ec4899",
+    accentStrong: "#a3e635",
+    pitchBorder: "#22d3ee",
+    pitchBackground: "#123b46",
     tokenRing: "#fef08a",
     fieldTokenColor: "#2563eb",
     benchTokenColor: "#16a34a",
     tokenShape: "square",
-    benchSurface: "rgba(49,46,129,0.94)",
+    benchSurface: "rgba(32,19,79,0.96)",
   },
 };
 
@@ -76,7 +76,7 @@ export function MatchThemeProvider({
       theme: MATCH_THEMES[name],
       toggleTheme: () =>
         setName((current) =>
-          current === "professional" ? "playful" : "professional",
+          current === "professional" ? "anime" : "professional",
         ),
     }),
     [name],
@@ -90,7 +90,8 @@ export function MatchThemeProvider({
 
 export function useMatchTheme() {
   const context = useContext(MatchThemeContext);
-  if (!context)
+  if (!context) {
     throw new Error("useMatchTheme must be used inside MatchThemeProvider");
+  }
   return context;
 }
