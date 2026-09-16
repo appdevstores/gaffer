@@ -553,6 +553,7 @@ const styles = StyleSheet.create({
   },
   settingsModalCard: {
     backgroundColor: "#0f172a",
+    overflow: "hidden",
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#334155",
