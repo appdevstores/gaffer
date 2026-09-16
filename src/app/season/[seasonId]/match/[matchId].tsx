@@ -12,6 +12,7 @@ import PitchField from "@/components/PitchField";
 import Scoreboard from "@/components/Scoreboard";
 import type { MatchPlayer } from "@/core/types";
 import { getFormation } from "@/lib/formations";
+import { formatClock } from "@/lib/mailto";
 import { MatchProvider, useMatch } from "@/state/MatchProvider";
 import { MatchThemeProvider, useMatchTheme } from "@/state/MatchTheme";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -47,6 +48,7 @@ function MatchShell() {
     setShowRotationBadges,
   } = useMatch();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [tabletControlsCollapsed, setTabletControlsCollapsed] = useState(false);
   const [cardTargetId, setCardTargetId] = useState<string | null>(null);
   const [removeTargetId, setRemoveTargetId] = useState<string | null>(null);
   if (!match) return null;
@@ -169,30 +171,79 @@ function MatchShell() {
       <View style={[styles.root, { backgroundColor: theme.root }]}>
         {header}
         <View style={styles.tabletRow}>
-          <View style={styles.tabletCanvas}>
+          <View
+            style={[
+              styles.tabletCanvas,
+              tabletControlsCollapsed && styles.tabletCanvasExpanded,
+            ]}
+          >
             <PitchField onCardPress={openCardDialog} />
           </View>
-          <View style={styles.tabletPanel}>
-            <ScrollView
-              contentContainerStyle={styles.tabletPanelContent}
-              showsVerticalScrollIndicator={false}
+          {tabletControlsCollapsed ? (
+            <View
+              style={[
+                styles.collapsedPanel,
+                { backgroundColor: theme.surface },
+              ]}
             >
-              <Scoreboard />
-              <View style={styles.panelSection}>{settingsButton}</View>
-              <View style={styles.panelSection}>
-                <BenchRoster
-                  bench={sortedBench}
-                  selectionId={selectionId}
-                  onSelect={selectPlayer}
-                  onAddLate={addLateArrival}
-                  nowSeconds={match.elapsedSeconds}
-                  fairShareSeconds={fairShareSeconds}
-                  onCardPress={(p) => openCardDialog(p.playerId)}
-                  onRemove={(p) => setRemoveTargetId(p.playerId)}
-                />
-              </View>
-            </ScrollView>
-          </View>
+              <Text style={styles.collapsedTeam} numberOfLines={1}>
+                {match.teamName}
+              </Text>
+              <Text style={styles.collapsedScore}>
+                {match.teamSide === "HOME" ? match.homeScore : match.awayScore}
+              </Text>
+              <Text style={styles.collapsedClock}>
+                {formatClock(match.elapsedSeconds - match.stageStartSeconds)}
+              </Text>
+              <Text style={styles.collapsedStage}>
+                {match.currentStage.replaceAll("_", " ")}
+              </Text>
+              <Text style={styles.collapsedVs}>—</Text>
+              <Text style={styles.collapsedTeam} numberOfLines={1}>
+                {match.opponentName}
+              </Text>
+              <Text style={styles.collapsedScore}>
+                {match.teamSide === "HOME" ? match.awayScore : match.homeScore}
+              </Text>
+              <Pressable
+                style={[styles.expandButton, { backgroundColor: theme.accent }]}
+                onPress={() => setTabletControlsCollapsed(false)}
+              >
+                <Text style={styles.expandButtonText}>›</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.tabletPanel}>
+              <ScrollView
+                contentContainerStyle={styles.tabletPanelContent}
+                showsVerticalScrollIndicator={false}
+              >
+                <View style={styles.panelHeaderRow}>
+                  <Text style={styles.panelHeaderText}>Match Controls</Text>
+                  <Pressable
+                    style={styles.collapseButton}
+                    onPress={() => setTabletControlsCollapsed(true)}
+                  >
+                    <Text style={styles.collapseButtonText}>›</Text>
+                  </Pressable>
+                </View>
+                <Scoreboard />
+                <View style={styles.panelSection}>{settingsButton}</View>
+                <View style={styles.panelSection}>
+                  <BenchRoster
+                    bench={sortedBench}
+                    selectionId={selectionId}
+                    onSelect={selectPlayer}
+                    onAddLate={addLateArrival}
+                    nowSeconds={match.elapsedSeconds}
+                    fairShareSeconds={fairShareSeconds}
+                    onCardPress={(p) => openCardDialog(p.playerId)}
+                    onRemove={(p) => setRemoveTargetId(p.playerId)}
+                  />
+                </View>
+              </ScrollView>
+            </View>
+          )}
         </View>
         {settingsModal}
         <CardDialog player={cardTarget} onClose={() => setCardTargetId(null)} />
@@ -332,6 +383,89 @@ const styles = StyleSheet.create({
   },
   tabletCanvas: {
     flex: 7,
+  },
+  tabletCanvasExpanded: {
+    flex: 1,
+  },
+  collapsedPanel: {
+    width: 92,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#334155",
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  collapsedTeam: {
+    color: "#cbd5e1",
+    fontSize: 10,
+    fontWeight: "800",
+    maxWidth: 78,
+    textAlign: "center",
+  },
+  collapsedScore: {
+    color: "#fff",
+    fontSize: 25,
+    lineHeight: 28,
+    fontWeight: "900",
+  },
+  collapsedClock: {
+    color: "#f8fafc",
+    fontSize: 15,
+    fontWeight: "900",
+    marginTop: 10,
+  },
+  collapsedStage: {
+    color: "#94a3b8",
+    fontSize: 8,
+    fontWeight: "800",
+    textAlign: "center",
+    textTransform: "uppercase",
+  },
+  collapsedVs: {
+    color: "#475569",
+    fontSize: 18,
+    marginVertical: 6,
+  },
+  expandButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 12,
+  },
+  expandButtonText: {
+    color: "#fff",
+    fontSize: 25,
+    fontWeight: "900",
+    lineHeight: 27,
+  },
+  panelHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 2,
+  },
+  panelHeaderText: {
+    color: "#94a3b8",
+    fontSize: 10,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  collapseButton: {
+    width: 28,
+    height: 26,
+    borderRadius: 8,
+    backgroundColor: "#334155",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  collapseButtonText: {
+    color: "#f8fafc",
+    fontSize: 20,
+    lineHeight: 22,
+    fontWeight: "900",
   },
   tabletPanel: {
     flex: 3,
