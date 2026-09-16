@@ -23,6 +23,8 @@ interface Props {
   hat: "big" | "small";
   /** One-word instruction shown in a speech bubble while the clock runs. */
   shout?: string | null;
+  /** Tablet technical areas run along the touchline horizontally. */
+  horizontal?: boolean;
   /** Base position along the track, 0 (top) .. 1 (bottom). */
   baseY: number;
   trackHeight: number;
@@ -66,6 +68,7 @@ export default function CoachToken({
   label,
   hat,
   shout,
+  horizontal = false,
   baseY,
   trackHeight,
   onChangeBaseY,
@@ -86,7 +89,10 @@ export default function CoachToken({
   return (
     <View
       {...pan.panHandlers}
-      style={[styles.positioner, { top: `${baseY * 100}%` }]}
+      style={[
+        styles.positioner,
+        horizontal ? styles.horizontalPositioner : { top: `${baseY * 100}%` },
+      ]}
     >
       <Animated.View style={[styles.inner, paceStyle]}>
         {shout && (
@@ -113,6 +119,13 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: "center",
     zIndex: 5,
+  },
+  horizontalPositioner: {
+    position: "relative",
+    left: undefined,
+    right: undefined,
+    top: 0,
+    flex: 1,
   },
   inner: {
     alignItems: "center",

@@ -428,6 +428,7 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
           backgroundColor: theme.pitchBackground,
           borderColor: theme.pitchBorder,
         },
+        !compact && styles.wrapperTablet,
       ]}
     >
       {/* Technical Area strip — §4 Rule C: pinned outside the field lines */}
@@ -440,6 +441,7 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
           onCoachY={setCoachY}
           paceStyle={paceStyle}
           shout={shout}
+          horizontal={!compact}
         />
       )}
 
@@ -760,6 +762,7 @@ export default function PitchField({ onCardPress }: PitchFieldProps) {
           onCoachY={setCoachY}
           paceStyle={paceStyle}
           shout={shout}
+          horizontal={!compact}
         />
       )}
     </View>
@@ -774,6 +777,7 @@ function TechnicalStrip({
   onCoachY,
   paceStyle,
   shout,
+  horizontal,
 }: {
   compact: boolean;
   height: number;
@@ -784,10 +788,15 @@ function TechnicalStrip({
     transform: { translateY: any }[];
   };
   shout: string | null;
+  horizontal: boolean;
 }) {
   return (
     <View
-      style={[styles.techStrip, compact && styles.techStripCompact]}
+      style={[
+        styles.techStrip,
+        compact && styles.techStripCompact,
+        horizontal && styles.techStripHorizontal,
+      ]}
       onLayout={(e) => onLayout(e.nativeEvent.layout.height)}
     >
       {!compact && (
@@ -803,6 +812,7 @@ function TechnicalStrip({
         trackHeight={height}
         onChangeBaseY={(y) => onCoachY({ ...coachY, head: y })}
         paceStyle={paceStyle("head")}
+        horizontal={horizontal}
       />
       <CoachToken
         label="Asst. Coach"
@@ -812,6 +822,7 @@ function TechnicalStrip({
         trackHeight={height}
         onChangeBaseY={(y) => onCoachY({ ...coachY, assistant: y })}
         paceStyle={paceStyle("assistant")}
+        horizontal={horizontal}
       />
     </View>
   );
@@ -827,6 +838,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#14532d",
+  },
+  wrapperTablet: {
+    flexDirection: "column",
   },
   pitch: {
     flex: 1,
@@ -914,6 +928,13 @@ const styles = StyleSheet.create({
   techStripCompact: {
     width: 36,
     paddingTop: 0,
+  },
+  techStripHorizontal: {
+    width: "100%",
+    height: 54,
+    flexDirection: "row",
+    paddingTop: 0,
+    paddingHorizontal: 12,
   },
   techLabel: {
     color: "#94a3b8",
