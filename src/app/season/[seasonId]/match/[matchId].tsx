@@ -27,6 +27,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, { Path } from "react-native-svg";
 
 function MatchShell() {
   const { theme, toggleTheme } = useMatchTheme();
@@ -208,8 +209,9 @@ function MatchShell() {
               <Pressable
                 style={[styles.expandButton, { backgroundColor: theme.accent }]}
                 onPress={() => setTabletControlsCollapsed(false)}
+                accessibilityLabel="Expand match controls"
               >
-                <Text style={styles.expandButtonText}>›</Text>
+                <PanelToggleIcon direction="left" />
               </Pressable>
             </View>
           ) : (
@@ -223,8 +225,9 @@ function MatchShell() {
                   <Pressable
                     style={styles.collapseButton}
                     onPress={() => setTabletControlsCollapsed(true)}
+                    accessibilityLabel="Collapse match controls"
                   >
-                    <Text style={styles.collapseButtonText}>›</Text>
+                    <PanelToggleIcon direction="right" />
                   </Pressable>
                 </View>
                 <Scoreboard />
@@ -285,6 +288,30 @@ function MatchShell() {
       {settingsModal}
       <CardDialog player={cardTarget} onClose={() => setCardTargetId(null)} />
     </View>
+  );
+}
+
+function PanelToggleIcon({ direction }: { direction: "left" | "right" }) {
+  const d =
+    direction === "right"
+      ? "M4 3 L10 11 L4 19 M12 3 L18 11 L12 19"
+      : "M18 3 L12 11 L18 19 M10 3 L4 11 L10 19";
+  return (
+    <Svg
+      width={22}
+      height={22}
+      viewBox="0 0 22 22"
+      accessibilityLabel={direction === "right" ? "Collapse" : "Expand"}
+    >
+      <Path
+        d={d}
+        stroke="#fff"
+        strokeWidth={2.6}
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
   );
 }
 
