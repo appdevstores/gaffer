@@ -86,6 +86,8 @@ export default function BenchRoster({
   // §space: on phone (compact) render vertical tiles so 4-6 subs fit at once.
   const benchStint = (p: MatchPlayer) =>
     Math.max(0, nowSeconds - (p.benchStartSeconds ?? 0));
+  const formatTargetMinutes = (seconds: number) =>
+    `${Math.round(seconds / 60)} min`;
   const cards = bench.map((p) => {
     const selected = p.playerId === selectionId;
     if (compact) {
@@ -287,7 +289,7 @@ export default function BenchRoster({
         <Text style={styles.title}>Subs Bench</Text>
         <View style={styles.headerRight}>
           <Text style={styles.avgTarget}>
-            target {formatClock(fairShareSeconds)}
+            target {formatTargetMinutes(fairShareSeconds)}
           </Text>
           <Text style={styles.count}>{bench.length} on bench</Text>
         </View>
