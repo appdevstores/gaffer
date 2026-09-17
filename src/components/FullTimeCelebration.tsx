@@ -5,8 +5,9 @@
 import type { MatchPlayer, MatchSession } from "@/core/types";
 import { avatarColor, avatarInitials } from "@/lib/avatars";
 import { useMatchTheme } from "@/state/MatchTheme";
-import { Animated, Easing, StyleSheet, Text, View } from "react-native";
 import { useEffect, useRef, useState } from "react";
+import { Animated, Easing, StyleSheet, Text, View } from "react-native";
+import Svg, { Circle, Line, Rect } from "react-native-svg";
 
 interface Props {
   match: MatchSession;
@@ -16,7 +17,11 @@ interface Props {
 
 const TOKEN_SIZE = 38;
 
-export default function FullTimeCelebration({ match, players, onComplete }: Props) {
+export default function FullTimeCelebration({
+  match,
+  players,
+  onComplete,
+}: Props) {
   const { theme } = useMatchTheme();
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [chant, setChant] = useState("FULL TIME");
@@ -36,16 +41,17 @@ export default function FullTimeCelebration({ match, players, onComplete }: Prop
     const radius = Math.min(size.width, size.height) * 0.28;
 
     const animations = players.map((_, index) => {
-      const angle = (index / Math.max(players.length, 1)) * Math.PI * 2 - Math.PI / 2;
+      const angle =
+        (index / Math.max(players.length, 1)) * Math.PI * 2 - Math.PI / 2;
       const startX = index % 2 === 0 ? -TOKEN_SIZE : size.width + TOKEN_SIZE;
-      const startY = 40 + (index * 47) % Math.max(size.height - 80, 1);
+      const startY = 40 + ((index * 47) % Math.max(size.height - 80, 1));
       positions[index].setValue({ x: startX, y: startY });
       return Animated.timing(positions[index], {
         toValue: {
           x: centerX + Math.cos(angle) * radius - TOKEN_SIZE / 2,
           y: centerY + Math.sin(angle) * radius - TOKEN_SIZE / 2,
         },
-        duration: 2700,
+        duration: 5200,
         delay: index * 35,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
@@ -54,16 +60,16 @@ export default function FullTimeCelebration({ match, players, onComplete }: Prop
 
     Animated.parallel(animations).start();
     const timers = [
-      setTimeout(() => setChant("3"), 2850),
-      setTimeout(() => setChant("2"), 3500),
-      setTimeout(() => setChant("1"), 4150),
-      setTimeout(() => setChant(match.teamName.toUpperCase()), 4550),
+      setTimeout(() => setChant("3"), 5600),
+      setTimeout(() => setChant("2"), 6600),
+      setTimeout(() => setChant("1"), 7600),
+      setTimeout(() => setChant(match.teamName.toUpperCase()), 8500),
       setTimeout(() => {
         if (!completed.current) {
           completed.current = true;
           onComplete();
         }
-      }, 5200),
+      }, 10000),
     ];
     return () => timers.forEach(clearTimeout);
   }, [match.teamName, onComplete, players, positions, size.height, size.width]);
@@ -76,20 +82,113 @@ export default function FullTimeCelebration({ match, players, onComplete }: Prop
         setSize({ width, height });
       }}
     >
+      <View style={styles.fieldBackdrop} pointerEvents="none">
+        <Svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+        >
+          <Rect
+            x="0"
+            y="0"
+            width="100"
+            height="100"
+            fill={theme.pitchBackground}
+          />
+          <Rect
+            x="0"
+            y="0"
+            width="50"
+            height="100"
+            fill="rgba(255,255,255,0.045)"
+          />
+          <Rect
+            x="50"
+            y="0"
+            width="50"
+            height="100"
+            fill="rgba(0,40,20,0.035)"
+          />
+          <Line
+            x1="50"
+            y1="0"
+            x2="50"
+            y2="100"
+            stroke="rgba(226,232,240,0.8)"
+            strokeWidth="0.35"
+          />
+          <Circle
+            cx="50"
+            cy="50"
+            r="12"
+            stroke="rgba(226,232,240,0.8)"
+            strokeWidth="0.35"
+            fill="none"
+          />
+          <Circle cx="50" cy="50" r="0.8" fill="rgba(226,232,240,0.9)" />
+          <Rect
+            x="0"
+            y="28"
+            width="10"
+            height="44"
+            stroke="rgba(226,232,240,0.8)"
+            strokeWidth="0.35"
+            fill="none"
+          />
+          <Rect
+            x="90"
+            y="28"
+            width="10"
+            height="44"
+            stroke="rgba(226,232,240,0.8)"
+            strokeWidth="0.35"
+            fill="none"
+          />
+          <Rect
+            x="0"
+            y="39"
+            width="4"
+            height="22"
+            stroke="rgba(226,232,240,0.8)"
+            strokeWidth="0.35"
+            fill="none"
+          />
+          <Rect
+            x="96"
+            y="39"
+            width="4"
+            height="22"
+            stroke="rgba(226,232,240,0.8)"
+            strokeWidth="0.35"
+            fill="none"
+          />
+        </Svg>
+      </View>
       <View style={styles.header}>
-        <Text style={[styles.kicker, { color: theme.accentStrong }]}>FULL TIME</Text>
+        <Text style={[styles.kicker, { color: theme.accentStrong }]}>
+          FULL TIME
+        </Text>
         <Text style={[styles.score, { color: theme.text }]}>
-          {match.teamName} {match.teamSide === "HOME" ? match.homeScore : match.awayScore}
+          {match.teamName}{" "}
+          {match.teamSide === "HOME" ? match.homeScore : match.awayScore}
           <Text style={styles.dash}> – </Text>
-          {match.teamSide === "HOME" ? match.awayScore : match.homeScore} {match.opponentName}
+          {match.teamSide === "HOME" ? match.awayScore : match.homeScore}{" "}
+          {match.opponentName}
         </Text>
       </View>
 
       <View style={styles.huddle} pointerEvents="none">
-        <View style={[styles.coachCircle, { borderColor: theme.accent }]}> 
+        <View style={[styles.coachCircle, { borderColor: theme.accent }]}>
           <Text style={styles.coachIcon}>⚽</Text>
         </View>
-        <View style={[styles.coachCircle, styles.secondCoach, { borderColor: theme.accentStrong }]}> 
+        <View
+          style={[
+            styles.coachCircle,
+            styles.secondCoach,
+            { borderColor: theme.accentStrong },
+          ]}
+        >
           <Text style={styles.coachIcon}>🧢</Text>
         </View>
         <Text
@@ -117,7 +216,9 @@ export default function FullTimeCelebration({ match, players, onComplete }: Prop
             },
           ]}
         >
-          <Text style={styles.playerText}>{avatarInitials(player.playerName)}</Text>
+          <Text style={styles.playerText}>
+            {avatarInitials(player.playerName)}
+          </Text>
         </Animated.View>
       ))}
     </View>
@@ -130,6 +231,13 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
+  },
+  fieldBackdrop: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
   },
   header: {
     position: "absolute",
