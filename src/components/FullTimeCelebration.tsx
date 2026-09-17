@@ -25,6 +25,18 @@ export default function FullTimeCelebration({
   const { theme } = useMatchTheme();
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [chant, setChant] = useState("FULL TIME");
+  const chantColors = ["#67e8f9", "#fef08a", "#f472b6", "#a3e635", "#fb923c"];
+  const chantColorIndex =
+    chant === "3"
+      ? 0
+      : chant === "2"
+        ? 1
+        : chant === "1"
+          ? 2
+          : chant === match.teamName.toUpperCase()
+            ? 3
+            : 4;
+  const chantColor = chantColors[chantColorIndex];
   const positions = useRef<Animated.ValueXY[]>([]).current;
   const completed = useRef(false);
 
@@ -180,6 +192,9 @@ export default function FullTimeCelebration({
 
       <View style={styles.huddle} pointerEvents="none">
         <View style={[styles.coachCircle, { borderColor: theme.accent }]}>
+          <View style={[styles.wordBubble, { backgroundColor: chantColor }]}>
+            <Text style={styles.wordBubbleText}>{chant}</Text>
+          </View>
           <Text style={styles.coachIcon}>⚽</Text>
         </View>
         <View
@@ -189,6 +204,17 @@ export default function FullTimeCelebration({
             { borderColor: theme.accentStrong },
           ]}
         >
+          <View
+            style={[
+              styles.wordBubble,
+              {
+                backgroundColor:
+                  chantColors[(chantColorIndex + 1) % chantColors.length],
+              },
+            ]}
+          >
+            <Text style={styles.wordBubbleText}>{chant}</Text>
+          </View>
           <Text style={styles.coachIcon}>🧢</Text>
         </View>
         <Text
@@ -216,6 +242,18 @@ export default function FullTimeCelebration({
             },
           ]}
         >
+          <View
+            style={[
+              styles.wordBubble,
+              styles.playerBubble,
+              {
+                backgroundColor:
+                  chantColors[(index + chantColorIndex) % chantColors.length],
+              },
+            ]}
+          >
+            <Text style={styles.wordBubbleText}>{chant}</Text>
+          </View>
           <Text style={styles.playerText}>
             {avatarInitials(player.playerName)}
           </Text>
@@ -283,6 +321,32 @@ const styles = StyleSheet.create({
   },
   coachIcon: {
     fontSize: 22,
+  },
+  wordBubble: {
+    position: "absolute",
+    bottom: 43,
+    minWidth: 34,
+    maxWidth: 130,
+    borderRadius: 7,
+    borderWidth: 1.5,
+    borderColor: "#fff",
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 4,
+    transform: [{ rotate: "-3deg" }],
+  },
+  playerBubble: {
+    bottom: 32,
+    maxWidth: 96,
+  },
+  wordBubbleText: {
+    color: "#0f172a",
+    fontSize: 9,
+    lineHeight: 11,
+    fontWeight: "900",
+    textAlign: "center",
   },
   chanter: {
     position: "absolute",
