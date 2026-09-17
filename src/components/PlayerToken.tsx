@@ -49,6 +49,12 @@ function formatLive(totalSeconds: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+function displayPlayerName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length <= 1 || name.trim().length <= 13) return name.trim();
+  return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+}
+
 export default function PlayerToken({
   player,
   size = TOKEN_SIZE,
@@ -241,7 +247,7 @@ export default function PlayerToken({
           ]}
         >
           <Text style={styles.nameRibbonText} numberOfLines={1}>
-            {player.playerName}
+            {displayPlayerName(player.playerName)}
           </Text>
         </View>
         {totalSeconds !== undefined && (
@@ -354,8 +360,8 @@ const styles = StyleSheet.create({
   },
   nameRibbon: {
     marginTop: -3,
-    minWidth: 66,
-    maxWidth: 92,
+    minWidth: 78,
+    maxWidth: 120,
     backgroundColor: "#0f172a",
     borderWidth: 1,
     borderColor: "#64748b",
