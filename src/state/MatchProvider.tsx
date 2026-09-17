@@ -431,12 +431,16 @@ export function MatchProvider({ matchId, children }: Props) {
         showNotice(`${sel.playerName} is sent off — cannot play`);
         return;
       }
+      if (sel.status === "bench") {
+        showNotice("Select a field player to substitute off");
+        return;
+      }
       const now = m.elapsedSeconds;
       const updated: MatchPlayer = {
         ...sel,
         status: "field" as PlayerStatus,
-        shiftStartSeconds: sel.status === "bench" ? now : sel.shiftStartSeconds,
-        shiftSeconds: sel.status === "bench" ? 0 : sel.shiftSeconds,
+        shiftStartSeconds: sel.shiftStartSeconds,
+        shiftSeconds: sel.shiftSeconds,
         benchStartSeconds: null, // off the bench — bench stint ends
         xPct,
         yPct,
