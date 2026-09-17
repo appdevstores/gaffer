@@ -8,6 +8,7 @@ import BackButton from "@/components/BackButton";
 import BenchRoster from "@/components/BenchRoster";
 import CardDialog from "@/components/CardDialog";
 import FormationPicker from "@/components/FormationPicker";
+import FullTimeCelebration from "@/components/FullTimeCelebration";
 import MatchSummary from "@/components/MatchSummary";
 import PitchField from "@/components/PitchField";
 import Scoreboard from "@/components/Scoreboard";
@@ -51,6 +52,7 @@ function MatchShell() {
   } = useMatch();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [tabletControlsCollapsed, setTabletControlsCollapsed] = useState(false);
+  const [celebrationComplete, setCelebrationComplete] = useState(false);
   const [cardTargetId, setCardTargetId] = useState<string | null>(null);
   const [removeTargetId, setRemoveTargetId] = useState<string | null>(null);
   if (!match) return null;
@@ -165,6 +167,18 @@ function MatchShell() {
       </Pressable>
     </View>
   );
+
+  if (fullTime && !celebrationComplete) {
+    return (
+      <View style={[styles.root, { backgroundColor: theme.root }]}>
+        <FullTimeCelebration
+          match={match}
+          players={players}
+          onComplete={() => setCelebrationComplete(true)}
+        />
+      </View>
+    );
+  }
 
   if (fullTime) {
     return (
