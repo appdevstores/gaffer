@@ -18,9 +18,13 @@ import {
 import type { GameFormat, Player, Team, TeamSide } from "@/core/types";
 import { avatarColor, avatarInitials } from "@/lib/avatars";
 import { getFormation } from "@/lib/formations";
+import DateTimePicker, {
+  type DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -28,6 +32,19 @@ import {
   TextInput,
   View,
 } from "react-native";
+
+function formatDateInput(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function dateFromInput(value: string): Date {
+  if (!value) return new Date();
+  const date = new Date(`${value}T12:00:00`);
+  return Number.isNaN(date.getTime()) ? new Date() : date;
+}
 
 export default function SetupMatch() {
   const { seasonId } = useLocalSearchParams<{ seasonId: string }>();
@@ -38,6 +55,8 @@ export default function SetupMatch() {
   const [teamName, setTeamName] = useState("");
   const [rememberedTeamName, setRememberedTeamName] = useState("");
   const [opponentName, setOpponentName] = useState("");
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [teamSide, setTeamSide] = useState<TeamSide>("HOME");
   const [startError, setStartError] = useState<string | null>(null);
   const [format, setFormat] = useState<GameFormat>("7v7");
@@ -103,9 +122,27 @@ export default function SetupMatch() {
     setFormationId(first.id);
   };
 
-  const handleStart = async () => {
+  const handleSave = async (openMatch: boolean) => {
     if (!seasonId) return;
     setStartError(null);
+
+    const dateText = scheduledDate.trim();
+    let scheduledAt: string | null = null;
+    if (dateText) {
+      const parts = dateText.split("-").map(Number);
+      const scheduled = new Date(`${dateText}T12:00:00`);
+      const validDate =
+        /^\d{4}-\d{2}-\d{2}$/.test(dateText) &&
+        !Number.isNaN(scheduled.getTime()) &&
+        scheduled.getFullYear() === parts[0] &&
+        scheduled.getMonth() + 1 === parts[1] &&
+        scheduled.getDate() === parts[2];
+      if (!validDate) {
+        setStartError("Use a valid date in YYYY-MM-DD format.");
+        return;
+      }
+      scheduledAt = scheduled.toISOString();
+    }
     if (!teamId) {
       setStartError("Create a team in Team Manager first.");
       return;
@@ -126,6 +163,7 @@ export default function SetupMatch() {
         teamId,
         teamName,
         opponentName: opponentName.trim() || "Opponent",
+        scheduledAt,
         teamSide,
         gameFormat: format,
         tacticalShape: formation.id,
@@ -137,7 +175,11 @@ export default function SetupMatch() {
       await rememberTeamName(teamName);
       await seedMatchPlayers(match.id, roster);
       await applyFormationSlots(match.id, formation);
-      router.replace(`/season/${seasonId}/match/${match.id}`);
+      if (openMatch) {
+        router.replace(`/season/${seasonId}/match/${match.id}`);
+      } else {
+        router.replace(`/season/${seasonId}?refresh=${Date.now()}`);
+      }
     } catch (e) {
       const detail = e instanceof Error ? e.message : "Unknown database error";
       setStartError(`Could not start the match: ${detail}`);
@@ -201,6 +243,50 @@ export default function SetupMatch() {
           value={opponentName}
           onChangeText={setOpponentName}
         />
+        <Text style={styles.label}>Match date (optional)</Text>
+        {Platform.OS === "web" ? (
+          <TextInput
+            style={styles.input}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor="#475569"
+            value={scheduledDate}
+            onChangeText={setScheduledDate}
+            keyboardType="numbers-and-punctuation"
+          />
+        ) : (
+          <View style={styles.dateRow}>
+            <Pressable
+              style={styles.dateButton}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={styles.dateButtonText}>
+                {scheduledDate || "Choose a date"}
+              </Text>
+            </Pressable>
+            {scheduledDate ? (
+              <Pressable
+                style={styles.clearDateButton}
+                onPress={() => setScheduledDate("")}
+              >
+                <Text style={styles.clearDateText}>Clear</Text>
+              </Pressable>
+            ) : null}
+          </View>
+        )}
+        {Platform.OS !== "web" && showDatePicker ? (
+          <DateTimePicker
+            value={dateFromInput(scheduledDate)}
+            mode="date"
+            display="default"
+            onChange={(_: DateTimePickerEvent, date?: Date) => {
+              setShowDatePicker(false);
+              if (date) setScheduledDate(formatDateInput(date));
+            }}
+          />
+        ) : null}
+        <Text style={styles.dateHint}>
+          Add a date to keep prepared matches in order.
+        </Text>
         <Text style={styles.label}>We are</Text>
         <View style={styles.sideRow}>
           {(["HOME", "AWAY"] as TeamSide[]).map((side) => (
@@ -362,8 +448,11 @@ export default function SetupMatch() {
 
       {startError && <Text style={styles.startError}>{startError}</Text>}
 
-      <Pressable style={styles.startBtn} onPress={handleStart}>
-        <Text style={styles.startBtnText}>▶ Start Match</Text>
+      <Pressable style={styles.startBtn} onPress={() => handleSave(true)}>
+        <Text style={styles.startBtnText}>▶ Save & Open Match</Text>
+      </Pressable>
+      <Pressable style={styles.saveLaterBtn} onPress={() => handleSave(false)}>
+        <Text style={styles.saveLaterText}>Save Match for Later</Text>
       </Pressable>
     </ScrollView>
   );
@@ -674,6 +763,37 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 10,
   },
+  dateHint: {
+    color: "#64748b",
+    fontSize: 11,
+    marginTop: -2,
+    marginBottom: 6,
+  },
+  dateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  dateButton: {
+    flex: 1,
+    backgroundColor: "#1e293b",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+  },
+  dateButtonText: {
+    color: "#f1f5f9",
+    fontSize: 14,
+  },
+  clearDateButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  clearDateText: {
+    color: "#93c5fd",
+    fontSize: 12,
+    fontWeight: "800",
+  },
   startBtn: {
     backgroundColor: "#16a34a",
     borderRadius: 14,
@@ -685,5 +805,14 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 15,
     fontWeight: "900",
+  },
+  saveLaterBtn: {
+    alignItems: "center",
+    paddingVertical: 14,
+  },
+  saveLaterText: {
+    color: "#93c5fd",
+    fontSize: 14,
+    fontWeight: "800",
   },
 });

@@ -79,6 +79,7 @@ async function migrate(db: SQLite.SQLiteDatabase): Promise<void> {
       is_clock_active INTEGER NOT NULL DEFAULT 0,
       stage_start_seconds INTEGER NOT NULL DEFAULT 0,
       started_at TEXT NOT NULL,
+      scheduled_at TEXT,
       completed_at TEXT,
       FOREIGN KEY (season_id) REFERENCES seasons(id) ON DELETE CASCADE,
       FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE SET NULL
@@ -182,6 +183,9 @@ async function migrateV2ExtraTime(db: SQLite.SQLiteDatabase): Promise<void> {
   if (!matchColumns.some((c) => c.name === "team_id")) {
     await db.execAsync("ALTER TABLE matches ADD COLUMN team_id TEXT");
   }
+  if (!matchColumns.some((c) => c.name === "scheduled_at")) {
+    await db.execAsync("ALTER TABLE matches ADD COLUMN scheduled_at TEXT");
+  }
   const teamColumns = await db.getAllAsync<{ name: string }>(
     "PRAGMA table_info(teams)",
   );
@@ -225,7 +229,7 @@ async function migrateV2ExtraTime(db: SQLite.SQLiteDatabase): Promise<void> {
 export type MetaKey =
   | "active_season_id"
   | "remembered_team_name"
-  | "premium_v2_receipt";
+  | "premium_entitlement";
 
 export async function getMetaValue(key: MetaKey): Promise<string | null> {
   const db = await getDb();

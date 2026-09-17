@@ -3,20 +3,21 @@
 // Open an Existing Season, or Season Lifecycle End (Stop Season).
 
 import { getMetaValue, setMetaValue } from "@/core/db";
-import { isPremiumUnlocked } from "@/core/premium";
+import { canCreateSeason } from "@/core/premium";
 import { createSeason, createTeam, listSeasons, stopSeason } from "@/core/repo";
 import type { Season as SeasonType } from "@/core/types";
+import { usePremium } from "@/state/PremiumProvider";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Image,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+    Image,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -31,6 +32,17 @@ export default function SeasonGate() {
   const [newTeamName, setNewTeamName] = useState("");
   const [confirmStop, setConfirmStop] = useState<SeasonType | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const {
+    plan,
+    isPro,
+    product,
+    isBusy,
+    error: premiumError,
+    purchasePro,
+    restorePurchases,
+    clearError,
+  } = usePremium();
 
   const refresh = useCallback(async () => {
     try {
@@ -49,12 +61,20 @@ export default function SeasonGate() {
     refresh().catch(() => {});
   }, [refresh]);
 
+  useEffect(() => {
+    if (isPro) setShowUpgrade(false);
+  }, [isPro]);
+
   const openSeason = async (s: SeasonType) => {
     await setMetaValue("active_season_id", s.id);
     router.push(`/season/${s.id}`);
   };
 
   const handleCreate = async () => {
+    if (!canCreateSeason(seasons.length, plan)) {
+      setShowUpgrade(true);
+      return;
+    }
     const name = newName.trim();
     const team = newTeamName.trim();
     if (!name || !team) return;
@@ -103,11 +123,9 @@ export default function SeasonGate() {
         accessibilityLabel="Gaffer logo"
       />
       <Text style={styles.tagline}>Tactical match-day manager</Text>
-      {!isPremiumUnlocked() && (
-        <Text style={styles.premiumLock}>
-          🔒 Premium required for this build
-        </Text>
-      )}
+      <Text style={styles.planBadge}>
+        {isPro ? "Gaffer Pro" : "Gaffer Free"}
+      </Text>
 
       <ScrollView
         contentContainerStyle={styles.body}
@@ -179,6 +197,56 @@ export default function SeasonGate() {
           </View>
         ))}
       </ScrollView>
+
+      <Modal
+        visible={showUpgrade}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowUpgrade(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Unlock Gaffer Pro</Text>
+            <Text style={styles.confirmBody}>
+              Free includes one season. Upgrade to Pro for unlimited seasons and
+              teams.
+            </Text>
+            {product ? (
+              <Text style={styles.productPrice}>{product.displayPrice}</Text>
+            ) : (
+              <Text style={styles.productPrice}>Price loading…</Text>
+            )}
+            {premiumError ? (
+              <Text style={styles.upgradeError}>{premiumError}</Text>
+            ) : null}
+            <Pressable
+              style={styles.modalConfirm}
+              disabled={isBusy}
+              onPress={() => void purchasePro()}
+            >
+              <Text style={styles.modalConfirmText}>
+                {isBusy ? "Working…" : "Buy Gaffer Pro"}
+              </Text>
+            </Pressable>
+            <Pressable
+              style={styles.restoreButton}
+              disabled={isBusy}
+              onPress={() => void restorePurchases()}
+            >
+              <Text style={styles.modalCancelText}>Restore purchases</Text>
+            </Pressable>
+            <Pressable
+              style={styles.modalCancel}
+              onPress={() => {
+                clearError();
+                setShowUpgrade(false);
+              }}
+            >
+              <Text style={styles.modalCancelText}>Not now</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
       <Modal visible={showNew} transparent animationType="fade">
         <View style={styles.modalBackdrop}>
@@ -270,11 +338,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
   },
-  premiumLock: {
-    color: "#fbbf24",
-    fontSize: 12,
-    textAlign: "center",
-    marginBottom: 8,
+  planBadge: {
+    alignSelf: "center",
+    color: "#86efac",
+    backgroundColor: "#14532d",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    fontSize: 11,
+    fontWeight: "800",
+    marginBottom: 12,
   },
   body: {
     paddingBottom: 24,
@@ -442,6 +515,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
     marginTop: 8,
+  },
+  productPrice: {
+    color: "#86efac",
+    fontSize: 18,
+    fontWeight: "900",
+    marginTop: 14,
+  },
+  upgradeError: {
+    color: "#fca5a5",
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 8,
+  },
+  restoreButton: {
+    alignItems: "center",
+    paddingVertical: 10,
   },
   stopConfirm: {
     backgroundColor: "#991b1b",

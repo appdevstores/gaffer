@@ -1,4 +1,5 @@
 import BackButton from "@/components/BackButton";
+import { canCreateTeam } from "@/core/premium";
 import {
   addPlayer,
   createTeam,
@@ -9,6 +10,7 @@ import {
 } from "@/core/repo";
 import type { GameFormat, Player, Team } from "@/core/types";
 import { GAME_FORMATS } from "@/lib/formations";
+import { usePremium } from "@/state/PremiumProvider";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -34,6 +36,16 @@ export default function TeamsScreen() {
   const [jersey, setJersey] = useState("");
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const {
+    plan,
+    product,
+    isBusy,
+    error: premiumError,
+    purchasePro,
+    restorePurchases,
+    clearError,
+  } = usePremium();
 
   const refresh = useCallback(async () => {
     if (!seasonId) return;
@@ -55,6 +67,10 @@ export default function TeamsScreen() {
     refresh();
   }, [refresh]);
 
+  useEffect(() => {
+    if (plan === "pro") setShowUpgrade(false);
+  }, [plan]);
+
   const chooseTeam = async (team: Team) => {
     setSelected(team);
     setTeamName(team.name);
@@ -63,8 +79,24 @@ export default function TeamsScreen() {
     if (seasonId) setPlayers(await listPlayers(seasonId, team.id));
   };
 
+  const startAddTeam = () => {
+    if (!canCreateTeam(teams.length, plan)) {
+      setShowUpgrade(true);
+      return;
+    }
+    setSelected(null);
+    setPlayers([]);
+    setTeamName("");
+    setHalfMinutes("20");
+    setGameFormat("7v7");
+  };
+
   const addTeam = async () => {
     if (!seasonId || !teamName.trim()) return;
+    if (!canCreateTeam(teams.length, plan)) {
+      setShowUpgrade(true);
+      return;
+    }
     const team = await createTeam(
       seasonId,
       teamName,
@@ -146,6 +178,9 @@ export default function TeamsScreen() {
             </Text>
           </Pressable>
         ))}
+        <Pressable style={styles.addTeamChip} onPress={startAddTeam}>
+          <Text style={styles.addTeamChipText}>+ Add team</Text>
+        </Pressable>
       </ScrollView>
 
       <View style={styles.card}>
@@ -254,6 +289,56 @@ export default function TeamsScreen() {
       </Pressable>
 
       <Modal
+        visible={showUpgrade}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowUpgrade(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Unlock Gaffer Pro</Text>
+            <Text style={styles.upgradeBody}>
+              Free includes one team per season. Upgrade to Pro for unlimited
+              teams.
+            </Text>
+            {product ? (
+              <Text style={styles.productPrice}>{product.displayPrice}</Text>
+            ) : (
+              <Text style={styles.productPrice}>Price loading…</Text>
+            )}
+            {premiumError ? (
+              <Text style={styles.upgradeError}>{premiumError}</Text>
+            ) : null}
+            <Pressable
+              style={styles.primary}
+              disabled={isBusy}
+              onPress={() => void purchasePro()}
+            >
+              <Text style={styles.primaryText}>
+                {isBusy ? "Working…" : "Buy Gaffer Pro"}
+              </Text>
+            </Pressable>
+            <Pressable
+              style={styles.restoreButton}
+              disabled={isBusy}
+              onPress={() => void restorePurchases()}
+            >
+              <Text style={styles.modalCancelText}>Restore purchases</Text>
+            </Pressable>
+            <Pressable
+              style={styles.modalCancel}
+              onPress={() => {
+                clearError();
+                setShowUpgrade(false);
+              }}
+            >
+              <Text style={styles.modalCancelText}>Not now</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
         visible={editingPlayer !== null}
         transparent
         animationType="fade"
@@ -321,6 +406,15 @@ const styles = StyleSheet.create({
   teamChipText: { color: "#cbd5e1", fontWeight: "800" },
   teamChipTextActive: { color: "#fff" },
   teamChipMeta: { color: "#64748b", fontSize: 10, marginTop: 3 },
+  addTeamChip: {
+    backgroundColor: "#172554",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#1d4ed8",
+  },
+  addTeamChipText: { color: "#93c5fd", fontWeight: "800" },
   card: {
     backgroundColor: "#0f172a",
     borderRadius: 14,
@@ -401,6 +495,23 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "900",
     marginBottom: 12,
+  },
+  upgradeBody: { color: "#cbd5e1", fontSize: 13, lineHeight: 19 },
+  productPrice: {
+    color: "#86efac",
+    fontSize: 18,
+    fontWeight: "900",
+    marginTop: 14,
+  },
+  upgradeError: {
+    color: "#fca5a5",
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 8,
+  },
+  restoreButton: {
+    alignItems: "center",
+    paddingVertical: 10,
   },
   modalActions: {
     flexDirection: "row",

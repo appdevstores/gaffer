@@ -39,7 +39,9 @@
           "imageWidth": 160
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-iap",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

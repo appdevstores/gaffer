@@ -4,15 +4,15 @@
 import { getDb } from "./db";
 import { uuid } from "./id";
 import type {
-  GameFormat,
-  MatchEvent,
-  MatchEventType,
-  MatchPlayer,
-  MatchSession,
-  MatchStage,
-  Player,
-  Season,
-  Team,
+    GameFormat,
+    MatchEvent,
+    MatchEventType,
+    MatchPlayer,
+    MatchSession,
+    MatchStage,
+    Player,
+    Season,
+    Team,
 } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -348,6 +348,7 @@ interface MatchRow {
   is_clock_active: number;
   stage_start_seconds: number;
   started_at: string;
+  scheduled_at: string | null;
   completed_at: string | null;
 }
 
@@ -373,6 +374,7 @@ function mapMatch(r: MatchRow): MatchSession {
     isClockActive: r.is_clock_active === 1,
     stageStartSeconds: r.stage_start_seconds,
     startedAt: r.started_at,
+    scheduledAt: r.scheduled_at,
     completedAt: r.completed_at,
   };
 }
@@ -389,6 +391,7 @@ export interface NewMatchInput {
   extraTimeEnabled?: boolean;
   extraTimeHalfMinutes?: number;
   extraTimeHalves?: number;
+  scheduledAt?: string | null;
 }
 
 export async function createMatch(input: NewMatchInput): Promise<MatchSession> {
@@ -414,6 +417,7 @@ export async function createMatch(input: NewMatchInput): Promise<MatchSession> {
     isClockActive: false,
     stageStartSeconds: 0,
     startedAt: new Date().toISOString(),
+    scheduledAt: input.scheduledAt ?? null,
     completedAt: null,
   };
   await db.runAsync(
@@ -422,8 +426,8 @@ export async function createMatch(input: NewMatchInput): Promise<MatchSession> {
       current_stage, field_orientation, team_side, target_half_minutes,
       extra_time_enabled, extra_time_half_minutes, extra_time_halves,
       home_score, away_score, elapsed_seconds, is_clock_active, stage_start_seconds,
-      started_at, completed_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, ?, NULL)`,
+      started_at, scheduled_at, completed_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, ?, ?, NULL)`,
     match.id,
     match.seasonId,
     match.teamId,
@@ -439,6 +443,7 @@ export async function createMatch(input: NewMatchInput): Promise<MatchSession> {
     match.extraTimeHalfMinutes,
     match.extraTimeHalves,
     match.startedAt,
+    match.scheduledAt,
   );
   return match;
 }
@@ -455,7 +460,13 @@ export async function getMatch(id: string): Promise<MatchSession | null> {
 export async function listMatches(seasonId: string): Promise<MatchSession[]> {
   const db = await getDb();
   const rows = await db.getAllAsync<MatchRow>(
-    "SELECT * FROM matches WHERE season_id = ? ORDER BY started_at DESC",
+    `SELECT * FROM matches
+     WHERE season_id = ?
+     ORDER BY
+       CASE current_stage WHEN 'PRE_MATCH' THEN 0 WHEN 'FULL_TIME' THEN 2 ELSE 1 END,
+       CASE WHEN scheduled_at IS NULL THEN 1 ELSE 0 END,
+       scheduled_at ASC,
+       started_at DESC`,
     seasonId,
   );
   return rows.map(mapMatch);
@@ -467,7 +478,11 @@ export async function findLiveMatch(
 ): Promise<MatchSession | null> {
   const db = await getDb();
   const row = await db.getFirstAsync<MatchRow>(
-    "SELECT * FROM matches WHERE season_id = ? AND current_stage <> 'FULL_TIME' ORDER BY started_at DESC LIMIT 1",
+    `SELECT * FROM matches
+     WHERE season_id = ?
+       AND current_stage NOT IN ('PRE_MATCH', 'FULL_TIME')
+     ORDER BY started_at DESC
+     LIMIT 1`,
     seasonId,
   );
   return row ? mapMatch(row) : null;

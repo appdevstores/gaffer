@@ -1,35 +1,15 @@
-// §8 In-App Purchase Grandfathering Framework.
-//
-// v1.x standard logic hook: the app ships with unrestricted access hardcoded
-// locally. No store SDK is linked in the 1.x release, so every feature is
-// unlocked with zero network calls.
-//
-// v2.x layer upgrade pattern (future release): before running the default
-// monetization engine, check the original app version recorded on the device.
-// Original v1.x adopters bypass subscription checking entirely:
+export type Plan = "free" | "pro";
 
-import { getMetaValue } from './db';
+export const FREE_SEASON_LIMIT = 1;
+export const FREE_TEAM_LIMIT = 1;
 
-export function isPremiumUnlocked(): boolean {
-  return true; // v1.x: unrestricted access, hardcoded locally.
+export function canCreateSeason(
+  seasonCount: number,
+  plan: Plan = "free",
+): boolean {
+  return plan === "pro" || seasonCount < FREE_SEASON_LIMIT;
 }
 
-/**
- * v2.x receipt-aware gate. Kept as the documented upgrade seam — the spec's
- * StoreProvider.getOriginalAppVersion() is injected by the store wrapper that
- * ships with the 2.x monetization release.
- */
-export async function isPremiumUnlockedV2(): Promise<boolean> {
-  // const downloadReceiptVersion = await StoreProvider.getOriginalAppVersion();
-  const downloadReceiptVersion = parseFloat(
-    (await getMetaValue('premium_v2_receipt')) ?? '1.0'
-  );
-
-  if (downloadReceiptVersion < 2.0) {
-    // Original v1.x adopter detected - bypass subscription checking entirely.
-    return true;
-  }
-  // New user - run default monetization engine checking rules.
-  // return evaluateActiveStoreSubscriptionState();
-  return true;
+export function canCreateTeam(teamCount: number, plan: Plan = "free"): boolean {
+  return plan === "pro" || teamCount < FREE_TEAM_LIMIT;
 }

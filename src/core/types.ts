@@ -84,6 +84,7 @@ export interface MatchSession {
   isClockActive: boolean;
   stageStartSeconds: number; // Clock timestamp when the current stage began (per-half clock)
   startedAt: string;
+  scheduledAt: string | null;
   completedAt: string | null;
 }
 

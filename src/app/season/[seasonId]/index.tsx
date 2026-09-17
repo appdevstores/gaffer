@@ -4,13 +4,13 @@
 import BackButton from "@/components/BackButton";
 import { getMetaValue, setMetaValue } from "@/core/db";
 import {
-    deletePlayer,
-    findLiveMatch,
-    getSeason,
-    listMatches,
-    listPlayers,
-    purgeSeason,
-    stopSeason,
+  deletePlayer,
+  findLiveMatch,
+  getSeason,
+  listMatches,
+  listPlayers,
+  purgeSeason,
+  stopSeason,
 } from "@/core/repo";
 import type { MatchSession, Player, Season } from "@/core/types";
 import { avatarColor, avatarInitials } from "@/lib/avatars";
@@ -18,17 +18,20 @@ import { formatClock, STAGE_LABELS } from "@/lib/mailto";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-    Alert,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function SeasonDashboard() {
-  const { seasonId } = useLocalSearchParams<{ seasonId: string }>();
+  const { seasonId, refresh: refreshKey } = useLocalSearchParams<{
+    seasonId: string;
+    refresh?: string;
+  }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [season, setSeason] = useState<Season | null>(null);
@@ -54,7 +57,7 @@ export default function SeasonDashboard() {
 
   useEffect(() => {
     refresh();
-  }, [refresh]);
+  }, [refresh, refreshKey]);
 
   const handleStop = () => {
     if (!season) return;
@@ -95,6 +98,37 @@ export default function SeasonDashboard() {
       ],
     );
   };
+
+  const preparedMatches = matches.filter(
+    (match) => match.currentStage === "PRE_MATCH",
+  );
+  const completedMatches = matches.filter(
+    (match) => match.currentStage === "FULL_TIME",
+  );
+  const renderMatchRow = (match: MatchSession, prepared = false) => (
+    <Pressable
+      key={match.id}
+      style={styles.matchRow}
+      onPress={() => router.push(`/season/${seasonId}/match/${match.id}`)}
+    >
+      <View style={styles.matchInfo}>
+        <Text style={styles.matchTeams}>
+          {match.teamName}{" "}
+          {match.teamSide === "HOME" ? match.homeScore : match.awayScore} –{" "}
+          {match.teamSide === "HOME" ? match.awayScore : match.homeScore}{" "}
+          {match.opponentName}
+        </Text>
+        <Text style={styles.matchMeta}>
+          {prepared && match.scheduledAt
+            ? `Scheduled ${new Date(match.scheduledAt).toLocaleDateString()}`
+            : new Date(match.startedAt).toLocaleDateString()}{" "}
+          · {match.gameFormat} ·{" "}
+          {prepared ? "Prepared" : STAGE_LABELS[match.currentStage]}
+        </Text>
+      </View>
+      <Text style={styles.chevron}>›</Text>
+    </Pressable>
+  );
 
   return (
     <View
@@ -205,34 +239,26 @@ export default function SeasonDashboard() {
           ))}
         </View>
 
+        {preparedMatches.length > 0 ? (
+          <>
+            <Text style={styles.sectionTitle}>
+              Prepared Matches ({preparedMatches.length})
+            </Text>
+            <View style={styles.card}>
+              {preparedMatches.map((match) => renderMatchRow(match, true))}
+            </View>
+          </>
+        ) : null}
+
         <Text style={styles.sectionTitle}>
-          Match History ({matches.length})
+          Match History ({completedMatches.length})
         </Text>
         <View style={styles.card}>
-          {matches.length === 0 && (
-            <Text style={styles.empty}>No matches yet.</Text>
+          {completedMatches.length === 0 ? (
+            <Text style={styles.empty}>No completed matches yet.</Text>
+          ) : (
+            completedMatches.map((match) => renderMatchRow(match))
           )}
-          {matches.map((m) => (
-            <Pressable
-              key={m.id}
-              style={styles.matchRow}
-              onPress={() => router.push(`/season/${seasonId}/match/${m.id}`)}
-            >
-              <View style={styles.matchInfo}>
-                <Text style={styles.matchTeams}>
-                  {m.teamName}{" "}
-                  {m.teamSide === "HOME" ? m.homeScore : m.awayScore} –{" "}
-                  {m.teamSide === "HOME" ? m.awayScore : m.homeScore}{" "}
-                  {m.opponentName}
-                </Text>
-                <Text style={styles.matchMeta}>
-                  {new Date(m.startedAt).toLocaleDateString()} · {m.gameFormat}{" "}
-                  · {STAGE_LABELS[m.currentStage]}
-                </Text>
-              </View>
-              <Text style={styles.chevron}>›</Text>
-            </Pressable>
-          ))}
         </View>
 
         <View style={styles.dangerZone}>
