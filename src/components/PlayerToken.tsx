@@ -13,6 +13,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import Svg, { Circle, Path, Polygon } from "react-native-svg";
 
 export const TOKEN_SIZE = 42;
 
@@ -53,6 +54,33 @@ function displayPlayerName(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length <= 1 || name.trim().length <= 13) return name.trim();
   return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+}
+
+function PlayerGlyph({ anime }: { anime: boolean }) {
+  if (anime) {
+    return (
+      <Svg width="58%" height="58%" viewBox="0 0 32 32">
+        <Polygon
+          points="18,1 7,18 15,18 12,31 26,12 18,12"
+          fill="#fef08a"
+          stroke="#fff"
+          strokeWidth="1"
+        />
+      </Svg>
+    );
+  }
+  return (
+    <Svg width="58%" height="58%" viewBox="0 0 32 32">
+      <Circle cx="16" cy="7" r="4" fill="#fff" />
+      <Path d="M8 29 C8 20 10 15 16 15 C22 15 24 20 24 29 Z" fill="#fff" />
+      <Path
+        d="M10 18 L4 23 M22 18 L28 23"
+        stroke="#fff"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
 }
 
 export default function PlayerToken({
@@ -192,6 +220,7 @@ export default function PlayerToken({
               />
             )}
             <View style={styles.avatarHighlight} pointerEvents="none" />
+            <PlayerGlyph anime={theme.name === "anime"} />
           </View>
           {/* sent-off dimming */}
           {sentOff && (
