@@ -98,8 +98,10 @@ export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
 
   const stageAction = getStageAction(match);
   const teamIsHome = match.teamSide === "HOME";
-  const teamScore = teamIsHome ? match.homeScore : match.awayScore;
-  const opponentScore = teamIsHome ? match.awayScore : match.homeScore;
+  const homeName = teamIsHome ? match.teamName : match.opponentName;
+  const awayName = teamIsHome ? match.opponentName : match.teamName;
+  const homeScore = match.homeScore;
+  const awayScore = match.awayScore;
   const ownGoalType: MatchEventType = teamIsHome ? "GOAL_HOME" : "GOAL_AWAY";
   const opponentGoalType: MatchEventType = teamIsHome
     ? "GOAL_AWAY"
@@ -143,21 +145,28 @@ export default function Scoreboard({ dense, onOpenSettings }: ScoreboardProps) {
       ]}
     >
       <View style={styles.topRow}>
-        {/* Team and opponent stay in fixed columns; flipping never re-centers or swaps them. */}
-        {scoreSide(
-          match.teamName,
-          teamScore,
-          "left",
-          () => (setEditingGoal(null), setScorerPicker(true)),
-        )}
+        {/* Standard match convention: HOME is always left, AWAY is always right. */}
+        {scoreSide(homeName, homeScore, "left", () => {
+          if (teamIsHome) {
+            setEditingGoal(null);
+            setScorerPicker(true);
+          } else {
+            registerGoal("GOAL_HOME", null);
+          }
+        })}
         {centerClock(
           inStoppage,
           perHalfSeconds,
           STAGE_LABEL[match.currentStage],
         )}
-        {scoreSide(match.opponentName, opponentScore, "right", () =>
-          registerGoal(opponentGoalType, null),
-        )}
+        {scoreSide(awayName, awayScore, "right", () => {
+          if (!teamIsHome) {
+            setEditingGoal(null);
+            setScorerPicker(true);
+          } else {
+            registerGoal("GOAL_AWAY", null);
+          }
+        })}
       </View>
 
       {/* Action rail: whistle stage button · flip. The whistle drives the clock. */}
