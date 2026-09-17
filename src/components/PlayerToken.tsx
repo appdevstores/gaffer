@@ -3,16 +3,15 @@
 // big formats (9v9/11v11) render denser tokens so they don't overlap.
 
 import type { MatchPlayer } from "@/core/types";
-import { avatarColor, avatarInitials } from "@/lib/avatars";
 import { useMatchTheme } from "@/state/MatchTheme";
 import {
-    Animated,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
-    type StyleProp,
-    type ViewStyle,
+  Animated,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
 
 export const TOKEN_SIZE = 42;
@@ -68,7 +67,6 @@ export default function PlayerToken({
   highlightRingStyle,
 }: Props) {
   const { theme } = useMatchTheme();
-  const color = avatarColor(player.avatarSeed);
   const ringInset = Math.round(size * 0.14);
 
   // Charge-driven visuals: amber ring when approaching the average, red when
@@ -187,15 +185,7 @@ export default function PlayerToken({
                 pointerEvents="none"
               />
             )}
-            <Text
-              style={[
-                styles.initials,
-                styles.primaryInitials,
-                { fontSize: Math.round(size * 0.38) },
-              ]}
-            >
-              {avatarInitials(player.playerName)}
-            </Text>
+            <View style={styles.avatarHighlight} pointerEvents="none" />
           </View>
           {/* sent-off dimming */}
           {sentOff && (
@@ -243,9 +233,17 @@ export default function PlayerToken({
             )
           )}
         </View>
-        <Text style={styles.name} numberOfLines={1}>
-          {player.playerName}
-        </Text>
+        <View
+          style={[
+            styles.nameRibbon,
+            theme.name === "anime" && styles.animeNameRibbon,
+            { borderRadius: theme.tokenShape === "round" ? 6 : 4 },
+          ]}
+        >
+          <Text style={styles.nameRibbonText} numberOfLines={1}>
+            {player.playerName}
+          </Text>
+        </View>
         {totalSeconds !== undefined && (
           <View
             style={[styles.liveBadge, { borderRadius: Math.round(size * 0.2) }]}
@@ -344,15 +342,40 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     letterSpacing: 0.5,
   },
-  name: {
-    marginTop: 2,
-    fontSize: 9,
+  avatarHighlight: {
+    position: "absolute",
+    top: 2,
+    left: 2,
+    right: 2,
+    height: "32%",
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderTopLeftRadius: 999,
+    borderTopRightRadius: 999,
+  },
+  nameRibbon: {
+    marginTop: -3,
+    minWidth: 66,
+    maxWidth: 92,
+    backgroundColor: "#0f172a",
+    borderWidth: 1,
+    borderColor: "#64748b",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    alignItems: "center",
+    zIndex: 3,
+  },
+  animeNameRibbon: {
+    backgroundColor: "#ec4899",
+    borderColor: "#fef08a",
+    transform: [{ rotate: "-3deg" }],
+  },
+  nameRibbonText: {
     color: "#fff",
+    fontSize: 9,
+    lineHeight: 11,
+    fontWeight: "900",
     textAlign: "center",
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowRadius: 2,
-    textShadowOffset: { width: 0, height: 1 },
-    maxWidth: 56,
+    maxWidth: 80,
   },
   liveBadge: {
     marginTop: 1,
